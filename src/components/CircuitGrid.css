@@ -1,0 +1,46 @@
+.circuit-grid-wrap {
+  display: flex;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.circuit-grid {
+  background: #f4e3c1;
+  border: 4px solid #1a1a1a;
+  border-radius: 18px 22px 16px 24px;
+  box-shadow: 4px 4px 0 #1a1a1a;
+}
+
+.junction {
+  fill: #1a1a1a;
+}
+
+.slot {
+  stroke: #c9b184;
+  stroke-width: 6;
+  stroke-linecap: round;
+  fill: none;
+  cursor: pointer;
+}
+
+.slot.placeable {
+  stroke: #8fbf8f;
+  stroke-dasharray: 4 6;
+}
+
+.slot.occupied {
+  stroke: #4a4a4a;
+}
+
+.slot.switch-open {
+  stroke: #c0392b;
+}
+
+.slot.switch-closed {
+  stroke: #27ae60;
+}
+
+.slot.live {
+  stroke: #ffcc33;
+  filter: drop-shadow(0 0 4px #ffcc33);
+}
