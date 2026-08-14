@@ -121,7 +121,7 @@ export default defineConfig({
     "skipLibCheck": true,
     "moduleResolution": "Bundler",
     "allowImportingTsExtensions": true,
-    "verbatimModuleSyntax": true,
+    "verbatimModuleSyntax": false,
     "moduleDetection": "force",
     "noEmit": true,
     "jsx": "react-jsx",
@@ -131,11 +131,13 @@ export default defineConfig({
     "erasableSyntaxOnly": true,
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true,
-    "types": ["vitest/globals", "@testing-library/jest-dom"]
+    "types": ["vite/client", "vitest/globals", "@testing-library/jest-dom"]
   },
   "include": ["src"]
 }
 ```
+
+> **Note (post-Task-3 ruling):** `verbatimModuleSyntax` is `false` here (not `true` as Ocean Math Quest has it) and `types` includes `"vite/client"` — both were discovered missing/wrong during Task 3's review, after `tsc -b` failed on every mixed type+value import written across this plan's own task code, plus a missing ambient CSS-module declaration for `main.tsx`'s `./index.css` import. Fixed in place here so this scaffold section reflects the corrected config; see the SDD ledger for the full ruling.
 
 `tsconfig.node.json`:
 ```json
@@ -147,7 +149,7 @@ export default defineConfig({
     "skipLibCheck": true,
     "moduleResolution": "Bundler",
     "allowImportingTsExtensions": true,
-    "verbatimModuleSyntax": true,
+    "verbatimModuleSyntax": false,
     "moduleDetection": "force",
     "noEmit": true,
     "strict": true
@@ -747,19 +749,19 @@ export const LEVELS: LevelDef[] = [
     title: 'Wire Two Lights in a Row',
     goal: 'Wire both LEDs into a single loop so they light up together.',
     rows: 2,
-    cols: 3,
+    cols: 2,
     fixed: {
       [edgeKey(0, 0, 'h')]: { type: 'battery' },
-      [edgeKey(0, 1, 'v')]: { type: 'led' },
-      [edgeKey(1, 1, 'h')]: { type: 'led' },
+      [edgeKey(0, 0, 'v')]: { type: 'led' },
+      [edgeKey(1, 0, 'h')]: { type: 'led' },
     },
-    tray: ['wire', 'wire', 'wire'],
+    tray: ['wire'],
     rewardPart: 'antenna',
   },
   {
     id: 'parallel',
     title: 'Give Each Light Its Own Path',
-    goal: 'Wire two LEDs on separate parallel branches so either can light on its own.',
+    goal: 'Wire two LEDs on separate parallel branches so both light together.',
     rows: 3,
     cols: 2,
     fixed: {
@@ -773,15 +775,15 @@ export const LEVELS: LevelDef[] = [
   {
     id: 'mixed',
     title: 'Build the Big Gadget Circuit',
-    goal: 'Combine switches and parallel wiring to light both bulbs independently.',
+    goal: 'Wire two independent switch-controlled branches so each bulb has its own switch.',
     rows: 3,
     cols: 3,
     fixed: {
-      [edgeKey(0, 0, 'h')]: { type: 'battery' },
+      [edgeKey(1, 0, 'h')]: { type: 'battery' },
       [edgeKey(0, 0, 'v')]: { type: 'bulb' },
       [edgeKey(2, 0, 'h')]: { type: 'bulb' },
     },
-    tray: ['wire', 'wire', 'wire', 'wire', 'switch', 'switch'],
+    tray: ['wire', 'wire', 'switch', 'switch'],
     rewardPart: 'arms',
   },
 ];

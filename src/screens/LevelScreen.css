@@ -1,0 +1,23 @@
+.level-screen {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1rem;
+}
+
+.level-screen .goal {
+  max-width: 420px;
+  text-align: center;
+  font-size: 1rem;
+}
+
+.level-screen .back-button {
+  align-self: flex-start;
+  font: inherit;
+  border: 3px solid #1a1a1a;
+  border-radius: 12px;
+  background: #fff;
+  padding: 0.4rem 0.9rem;
+  cursor: pointer;
+}

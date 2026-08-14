@@ -1,8 +1,36 @@
+import { useState } from 'react';
+import { LEVELS } from './domain/levels';
+import { ProgressProvider, useProgress } from './store/ProgressContext';
+import { WorkshopMap } from './screens/WorkshopMap';
+import { LevelScreen } from './screens/LevelScreen';
+
+function AppShell() {
+  const [activeLevelId, setActiveLevelId] = useState<string | null>(null);
+  const { completeLevel } = useProgress();
+
+  if (!activeLevelId) {
+    return <WorkshopMap onSelectLevel={setActiveLevelId} />;
+  }
+
+  const level = LEVELS.find((candidate) => candidate.id === activeLevelId);
+  if (!level) {
+    setActiveLevelId(null);
+    return null;
+  }
+
+  return (
+    <LevelScreen
+      level={level}
+      onBack={() => setActiveLevelId(null)}
+      onComplete={() => completeLevel(level.id)}
+    />
+  );
+}
+
 export default function App() {
   return (
-    <main style={{ padding: '1rem', textAlign: 'center' }}>
-      <h1>Circuit Workshop</h1>
-      <p>The robot workshop is warming up&hellip;</p>
-    </main>
+    <ProgressProvider>
+      <AppShell />
+    </ProgressProvider>
   );
 }
