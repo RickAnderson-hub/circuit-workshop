@@ -43,4 +43,12 @@ describe('ProgressContext', () => {
     expect(screen.getByTestId('second-unlocked')).toHaveTextContent('true');
     expect(loadProgress().completedLevelIds).toEqual([LEVELS[0].id]);
   });
+
+  it('throws when used outside a ProgressProvider', () => {
+    function Bare() {
+      useProgress();
+      return null;
+    }
+    expect(() => render(<Bare />)).toThrow('useProgress must be used within a ProgressProvider');
+  });
 });
