@@ -7,6 +7,11 @@ export default defineConfig({
   base: './',
   test: {
     environment: 'jsdom',
+    environmentOptions: {
+      jsdom: {
+        localStorage: true,
+      },
+    },
     setupFiles: './src/test/setup.ts',
     globals: true,
   },
