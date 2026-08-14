@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { LevelDef } from '../domain/levels';
 import { solveCircuit } from '../domain/solveCircuit';
 import { ComponentType, GridState } from '../domain/types';
@@ -28,15 +28,15 @@ export function LevelScreen({ level, onComplete, onBack }: LevelScreenProps) {
   const [selected, setSelected] = useState<ComponentType | null>(null);
   const completedRef = useRef(false);
 
+  useEffect(() => {
+    if (!completedRef.current && isSolved(level, grid)) {
+      completedRef.current = true;
+      onComplete();
+    }
+  }, [grid, level, onComplete]);
+
   function handlePlace(key: string, type: ComponentType) {
-    setGrid((previous) => {
-      const next = { ...previous, edges: { ...previous.edges, [key]: { type } } };
-      if (!completedRef.current && isSolved(level, next)) {
-        completedRef.current = true;
-        onComplete();
-      }
-      return next;
-    });
+    setGrid((previous) => ({ ...previous, edges: { ...previous.edges, [key]: { type } } }));
     setSelected(null);
   }
 
@@ -44,15 +44,10 @@ export function LevelScreen({ level, onComplete, onBack }: LevelScreenProps) {
     setGrid((previous) => {
       const component = previous.edges[key];
       if (!component || component.type !== 'switch') return previous;
-      const next = {
+      return {
         ...previous,
         edges: { ...previous.edges, [key]: { type: 'switch' as const, closed: !component.closed } },
       };
-      if (!completedRef.current && isSolved(level, next)) {
-        completedRef.current = true;
-        onComplete();
-      }
-      return next;
     });
   }
 
