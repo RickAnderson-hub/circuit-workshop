@@ -66,6 +66,10 @@ export function solveCircuit(grid: GridState): Set<EdgeKey> {
   const [batteryA, batteryB] = terminals;
 
   const adjacency = buildAdjacency(grid);
+  // Check if an external path exists between battery terminals. This upfront check is critical:
+  // in the per-edge loop below, for the battery edge itself, aKey and bKey are each BFS's start
+  // node from a battery terminal, making them trivially reachable (always true). Without this
+  // guard, the battery would be incorrectly marked live even if no external path exists.
   const externallyClosed = reachableFrom(adjacency, batteryA, [batteryA, batteryB]).has(batteryB);
   if (!externallyClosed) return new Set();
 
