@@ -1,4 +1,4 @@
-import { ComponentType, createEmptyGrid, edgeKey, GridState } from './types';
+import { ComponentType, edgeKey, GridState } from './types';
 
 export type RobotPart = 'nose' | 'eyes' | 'antenna' | 'propeller' | 'arms';
 
