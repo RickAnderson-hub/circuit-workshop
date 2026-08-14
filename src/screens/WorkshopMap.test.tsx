@@ -32,4 +32,14 @@ describe('WorkshopMap', () => {
 
     expect(screen.getByTestId(`part-${LEVELS[0].rewardPart}`)).toHaveClass('earned');
   });
+
+  it('shows the robot celebrating when a celebratingLevelId is passed', () => {
+    render(
+      <ProgressProvider>
+        <WorkshopMap onSelectLevel={vi.fn()} celebratingLevelId={LEVELS[0].id} />
+      </ProgressProvider>,
+    );
+
+    expect(screen.getByTestId('robot-sidekick')).toHaveClass('celebrating');
+  });
 });

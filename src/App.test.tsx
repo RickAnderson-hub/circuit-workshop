@@ -20,4 +20,23 @@ describe('App', () => {
     await user.click(screen.getByRole('button', { name: /back/i }));
     expect(screen.getByText('The Robot Workshop')).toBeInTheDocument();
   });
+
+  it('celebrates on the workshop map after completing a level', async () => {
+    const user = userEvent.setup();
+    render(<App />);
+
+    await user.click(screen.getByRole('button', { name: LEVELS[0].title }));
+
+    // Level 0 grid is 2x2 with a battery on edge (0,0,'h') and a bulb on
+    // (0,1,'v'); the tray has two wires to complete the loop via
+    // (0,0,'v') and (1,0,'h').
+    await user.click(screen.getAllByRole('button', { name: /wire/i })[0]);
+    await user.click(screen.getByTestId('slot-0,0,v'));
+    await user.click(screen.getAllByRole('button', { name: /wire/i })[0]);
+    await user.click(screen.getByTestId('slot-1,0,h'));
+
+    await user.click(screen.getByRole('button', { name: /back/i }));
+    expect(screen.getByText('The Robot Workshop')).toBeInTheDocument();
+    expect(screen.getByTestId('robot-sidekick')).toHaveClass('celebrating');
+  });
 });

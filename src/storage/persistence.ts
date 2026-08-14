@@ -22,7 +22,11 @@ export function loadProgress(): ProgressState {
 }
 
 export function saveProgress(state: ProgressState): void {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  } catch (error) {
+    console.warn('Failed to save progress:', error);
+  }
 }
 
 export function completeLevel(state: ProgressState, levelId: string): ProgressState {

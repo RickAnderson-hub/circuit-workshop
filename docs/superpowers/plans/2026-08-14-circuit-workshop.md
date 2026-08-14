@@ -765,8 +765,8 @@ export const LEVELS: LevelDef[] = [
     rows: 3,
     cols: 2,
     fixed: {
-      [edgeKey(0, 0, 'h')]: { type: 'battery' },
-      [edgeKey(0, 0, 'v')]: { type: 'led' },
+      [edgeKey(1, 0, 'h')]: { type: 'battery' },
+      [edgeKey(0, 0, 'h')]: { type: 'led' },
       [edgeKey(2, 0, 'h')]: { type: 'led' },
     },
     tray: ['wire', 'wire', 'wire', 'wire'],

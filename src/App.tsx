@@ -6,10 +6,17 @@ import { LevelScreen } from './screens/LevelScreen';
 
 function AppShell() {
   const [activeLevelId, setActiveLevelId] = useState<string | null>(null);
+  const [justCompletedLevelId, setJustCompletedLevelId] = useState<string | null>(null);
   const { completeLevel } = useProgress();
 
   if (!activeLevelId) {
-    return <WorkshopMap onSelectLevel={setActiveLevelId} />;
+    return (
+      <WorkshopMap
+        onSelectLevel={setActiveLevelId}
+        celebratingLevelId={justCompletedLevelId}
+        onCelebrationDone={() => setJustCompletedLevelId(null)}
+      />
+    );
   }
 
   const level = LEVELS.find((candidate) => candidate.id === activeLevelId);
@@ -22,7 +29,10 @@ function AppShell() {
     <LevelScreen
       level={level}
       onBack={() => setActiveLevelId(null)}
-      onComplete={() => completeLevel(level.id)}
+      onComplete={() => {
+        completeLevel(level.id);
+        setJustCompletedLevelId(level.id);
+      }}
     />
   );
 }
