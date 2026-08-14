@@ -1,0 +1,21 @@
+.robot-sidekick {
+  display: block;
+  margin: 0 auto;
+}
+
+.robot-sidekick.celebrating {
+  animation: robot-bounce 0.6s ease-in-out infinite;
+}
+
+@keyframes robot-bounce {
+  0%, 100% { transform: translateY(0) rotate(-2deg); }
+  50% { transform: translateY(-10px) rotate(2deg); }
+}
+
+.robot-part {
+  opacity: 0.25;
+}
+
+.robot-part.earned {
+  opacity: 1;
+}
