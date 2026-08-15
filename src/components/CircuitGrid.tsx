@@ -198,13 +198,13 @@ export function CircuitGrid({ grid, onPlace, onToggleSwitch, onRemove, fixedKeys
                 stroke="transparent"
                 strokeWidth={28}
                 strokeLinecap="round"
-                draggable={removable}
                 onClick={() => handleSlotClick(key)}
                 onDragStart={handleDragStart}
                 onDragOver={handleDragOver}
                 onDragLeave={handleDragLeave}
                 onDrop={handleDrop}
                 style={{ cursor: 'pointer' }}
+                {...{ draggable: removable }}
               />
               {component?.type === 'battery' && (
                 <g transform={`translate(${midX} ${midY}) rotate(${orientation === 'v' ? 90 : 0})`}>
