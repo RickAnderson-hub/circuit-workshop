@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { LevelDef } from '../domain/levels';
-import { solveCircuit } from '../domain/solveCircuit';
+import { isSolved } from '../domain/solveCircuit';
 import { ComponentType, GridState } from '../domain/types';
 import { CircuitGrid } from '../components/CircuitGrid';
 import { ComponentTray } from '../components/ComponentTray';
@@ -10,13 +10,6 @@ export interface LevelScreenProps {
   level: LevelDef;
   onComplete: () => void;
   onBack: () => void;
-}
-
-function isSolved(level: LevelDef, grid: GridState): boolean {
-  const live = solveCircuit(grid);
-  return Object.entries(level.fixed)
-    .filter(([, component]) => component.type === 'led' || component.type === 'bulb')
-    .every(([key]) => live.has(key));
 }
 
 export function LevelScreen({ level, onComplete, onBack }: LevelScreenProps) {

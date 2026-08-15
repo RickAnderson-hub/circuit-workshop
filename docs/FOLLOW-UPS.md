@@ -15,7 +15,7 @@ Backlog of things worth doing next, gathered from the build and review process. 
 ## Testing gaps (correctness is fine; coverage has holes)
 
 - **The `live` (glowing) CSS state isn't directly asserted by any test.** The `data-testid` used in tests sits on the invisible tap-target line, not the visible line that actually gets the `live` class — the assertion passes for a reason unrelated to what it's meant to prove. Fix: move `data-testid` to the visible line, give the tap-target its own `data-testid`, retarget the CircuitGrid tests.
-- **No automated solvability check for level data.** Every level's solvability has been verified by hand (twice — the 'parallel' level slipped through once and was caught by the final review). A test that brute-forces tray-component placements and asserts every level has at least one winning arrangement would catch this class of bug automatically instead of relying on manual tracing. This is the single highest-leverage test to add.
+- ~~No automated solvability check for level data.~~ Done: `src/domain/levelSolvability.ts` brute-forces tray-component placements (treating the tray as an unlimited supply of its distinct types, matching in-game behavior) and `src/domain/levelSolvability.test.ts` asserts every shipped level has at least one winning arrangement.
 - **RobotSidekick's test only exercises 1 of 5 reward parts** (earned vs. dim), not the full part matrix.
 - **SVG `<line>` elements have a zero-area bounding box**, which blocks Playwright and similar browser-automation tools from clicking them even though real touch/mouse clicks work fine (confirmed manually). If an automated end-to-end test suite is ever added, swap in a `<rect>` (or similar) hit-area element so it's automation-friendly too.
 

@@ -1,4 +1,5 @@
 import { edgeJunctions, EdgeKey, GridState, junctionKey, PlacedComponent } from './types';
+import { LevelDef } from './levels';
 
 function conducts(component: PlacedComponent): boolean {
   if (component.type === 'switch') return component.closed === true;
@@ -89,4 +90,12 @@ export function solveCircuit(grid: GridState): Set<EdgeKey> {
     if (forward || backward) live.add(key);
   }
   return live;
+}
+
+/** A level is solved once every fixed bulb/LED in it is carrying current. */
+export function isSolved(level: LevelDef, grid: GridState): boolean {
+  const live = solveCircuit(grid);
+  return Object.entries(level.fixed)
+    .filter(([, component]) => component.type === 'led' || component.type === 'bulb')
+    .every(([key]) => live.has(key));
 }
