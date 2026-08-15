@@ -1,6 +1,6 @@
 import { ComponentType, edgeKey, GridState } from './types';
 
-export type RobotPart = 'nose' | 'eyes' | 'antenna' | 'propeller' | 'arms';
+export type RobotPart = 'nose' | 'eyes' | 'antenna' | 'propeller' | 'arms' | 'legs' | 'jetpack';
 
 export interface LevelDef {
   id: string;
@@ -82,5 +82,33 @@ export const LEVELS: LevelDef[] = [
     },
     tray: ['wire', 'wire', 'switch', 'switch'],
     rewardPart: 'arms',
+  },
+  {
+    id: 'switch-gate',
+    title: 'Wire Two Switches Into One Gate',
+    goal: 'Add two switches to the loop — both must be closed to light the bulb.',
+    rows: 2,
+    cols: 2,
+    fixed: {
+      [edgeKey(0, 0, 'h')]: { type: 'battery' },
+      [edgeKey(0, 1, 'v')]: { type: 'bulb' },
+    },
+    tray: ['switch', 'switch'],
+    rewardPart: 'legs',
+  },
+  {
+    id: 'combo',
+    title: 'Power the Whole Workshop',
+    goal: 'Wire two LEDs in series on one branch, and a third LED on a separate parallel branch, so all three light up together.',
+    rows: 3,
+    cols: 3,
+    fixed: {
+      [edgeKey(1, 0, 'h')]: { type: 'battery' },
+      [edgeKey(0, 0, 'v')]: { type: 'led' },
+      [edgeKey(0, 1, 'v')]: { type: 'led' },
+      [edgeKey(2, 0, 'h')]: { type: 'led' },
+    },
+    tray: ['wire', 'wire', 'wire'],
+    rewardPart: 'jetpack',
   },
 ];

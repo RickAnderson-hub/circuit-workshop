@@ -44,6 +44,18 @@ export function RobotSidekick({ earnedParts, celebrating }: RobotSidekickProps) 
       <g data-testid="part-propeller" className={`robot-part${isEarned('propeller') ? ' earned' : ''}`}>
         <line x1="50" y1="14" x2="110" y2="14" stroke="#1a1a1a" strokeWidth="4" />
       </g>
+
+      <g data-testid="part-legs" className={`robot-part${isEarned('legs') ? ' earned' : ''}`}>
+        <rect x="55" y="150" width="15" height="22" rx="4" fill="#7a5a34" stroke="#1a1a1a" strokeWidth="3" />
+        <rect x="90" y="150" width="15" height="22" rx="4" fill="#7a5a34" stroke="#1a1a1a" strokeWidth="3" />
+      </g>
+
+      <g data-testid="part-jetpack" className={`robot-part${isEarned('jetpack') ? ' earned' : ''}`}>
+        <rect x="8" y="95" width="14" height="40" rx="4" fill="#c9d6e3" stroke="#1a1a1a" strokeWidth="3" />
+        <rect x="138" y="95" width="14" height="40" rx="4" fill="#c9d6e3" stroke="#1a1a1a" strokeWidth="3" />
+        <path d="M 9 135 L 15 150 L 21 135 L 15 143 Z" fill="#ff6b6b" />
+        <path d="M 139 135 L 145 150 L 151 135 L 145 143 Z" fill="#ff6b6b" />
+      </g>
     </svg>
   );
 }

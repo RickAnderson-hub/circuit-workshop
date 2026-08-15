@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest';
 import { RobotPart } from '../domain/levels';
 import { RobotSidekick } from './RobotSidekick';
 
-const ALL_PARTS: RobotPart[] = ['nose', 'eyes', 'antenna', 'propeller', 'arms'];
+const ALL_PARTS: RobotPart[] = ['nose', 'eyes', 'antenna', 'propeller', 'arms', 'legs', 'jetpack'];
 
 describe('RobotSidekick', () => {
   it.each(ALL_PARTS)('marks %s as earned only when it is in earnedParts, leaving the rest dim', (earnedPart) => {

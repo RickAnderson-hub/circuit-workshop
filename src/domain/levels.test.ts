@@ -22,8 +22,8 @@ describe('LEVELS', () => {
     }
   });
 
-  it('assigns a distinct reward part to each of the first five levels', () => {
-    const firstFive = LEVELS.slice(0, 5).map((level) => level.rewardPart);
-    expect(new Set(firstFive).size).toBe(5);
+  it('assigns a distinct reward part to every level', () => {
+    const rewardParts = LEVELS.map((level) => level.rewardPart);
+    expect(new Set(rewardParts).size).toBe(rewardParts.length);
   });
 });
