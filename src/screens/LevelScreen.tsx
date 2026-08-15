@@ -1,9 +1,12 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { LevelDef } from '../domain/levels';
+import { earnedPartsFrom } from '../domain/rewards';
 import { isSolved } from '../domain/solveCircuit';
 import { ComponentType, GridState } from '../domain/types';
 import { CircuitGrid } from '../components/CircuitGrid';
 import { ComponentTray } from '../components/ComponentTray';
+import { RobotSidekick } from '../components/RobotSidekick';
+import { useProgress } from '../store/ProgressContext';
 import { playSound } from '../audio/sound';
 import { useMuted } from '../audio/useMuted';
 import './LevelScreen.css';
@@ -12,18 +15,22 @@ export interface LevelScreenProps {
   level: LevelDef;
   onComplete: () => void;
   onBack: () => void;
+  onNext?: () => void;
 }
 
-export function LevelScreen({ level, onComplete, onBack }: LevelScreenProps) {
+export function LevelScreen({ level, onComplete, onBack, onNext }: LevelScreenProps) {
   const [grid, setGrid] = useState<GridState>(() => ({
     rows: level.rows,
     cols: level.cols,
     edges: { ...level.fixed },
   }));
   const [selected, setSelected] = useState<ComponentType | null>(null);
+  const [solved, setSolved] = useState(false);
   const [muted, toggleMuted] = useMuted();
+  const { state } = useProgress();
   const completedRef = useRef(false);
   const fixedKeys = useMemo(() => new Set(Object.keys(level.fixed)), [level]);
+  const earnedParts = useMemo(() => earnedPartsFrom(state.completedLevelIds), [state]);
 
   const totalCounts = useMemo(() => {
     const counts: Partial<Record<ComponentType, number>> = {};
@@ -47,6 +54,7 @@ export function LevelScreen({ level, onComplete, onBack }: LevelScreenProps) {
   useEffect(() => {
     if (!completedRef.current && isSolved(grid)) {
       completedRef.current = true;
+      setSolved(true);
       playSound('solve', muted);
       onComplete();
     }
@@ -98,6 +106,22 @@ export function LevelScreen({ level, onComplete, onBack }: LevelScreenProps) {
       </div>
       <h2>{level.title}</h2>
       <p className="goal">{level.goal}</p>
+      {solved && (
+        <div className="level-complete-banner" data-testid="level-complete-banner">
+          <RobotSidekick earnedParts={earnedParts} celebrating />
+          <p className="level-complete-message">🎉 Solved!</p>
+          <div className="level-complete-actions">
+            <button type="button" onClick={onBack}>
+              Back to Map
+            </button>
+            {onNext && (
+              <button type="button" onClick={onNext}>
+                Next Level →
+              </button>
+            )}
+          </div>
+        </div>
+      )}
       <CircuitGrid
         grid={grid}
         onPlace={handlePlace}

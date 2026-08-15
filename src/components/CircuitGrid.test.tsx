@@ -232,4 +232,81 @@ describe('CircuitGrid', () => {
     );
     expect(screen.getByTestId(`hit-${edgeKey(0, 0, 'h')}`)).toHaveAttribute('draggable', 'false');
   });
+
+  it('removes a placed switch on a long press, without toggling it', () => {
+    vi.useFakeTimers();
+    const onToggleSwitch = vi.fn();
+    const onRemove = vi.fn();
+    const grid = createEmptyGrid(2, 2);
+    grid.edges[edgeKey(0, 0, 'h')] = { type: 'switch', closed: false };
+    render(
+      <CircuitGrid
+        grid={grid}
+        onPlace={vi.fn()}
+        onToggleSwitch={onToggleSwitch}
+        onRemove={onRemove}
+        fixedKeys={new Set()}
+        pendingComponent={null}
+      />,
+    );
+    const hit = screen.getByTestId(`hit-${edgeKey(0, 0, 'h')}`);
+    fireEvent.pointerDown(hit);
+    vi.advanceTimersByTime(600);
+    fireEvent.pointerUp(hit);
+
+    expect(onRemove).toHaveBeenCalledWith(edgeKey(0, 0, 'h'));
+    expect(onToggleSwitch).not.toHaveBeenCalled();
+    vi.useRealTimers();
+  });
+
+  it('does not remove a switch on a short press (still toggles)', () => {
+    vi.useFakeTimers();
+    const onToggleSwitch = vi.fn();
+    const onRemove = vi.fn();
+    const grid = createEmptyGrid(2, 2);
+    grid.edges[edgeKey(0, 0, 'h')] = { type: 'switch', closed: false };
+    render(
+      <CircuitGrid
+        grid={grid}
+        onPlace={vi.fn()}
+        onToggleSwitch={onToggleSwitch}
+        onRemove={onRemove}
+        fixedKeys={new Set()}
+        pendingComponent={null}
+      />,
+    );
+    const hit = screen.getByTestId(`hit-${edgeKey(0, 0, 'h')}`);
+    fireEvent.pointerDown(hit);
+    vi.advanceTimersByTime(100);
+    fireEvent.pointerUp(hit);
+    fireEvent.click(hit);
+
+    expect(onRemove).not.toHaveBeenCalled();
+    expect(onToggleSwitch).toHaveBeenCalledWith(edgeKey(0, 0, 'h'));
+    vi.useRealTimers();
+  });
+
+  it('does not remove a fixed switch on a long press', () => {
+    vi.useFakeTimers();
+    const onRemove = vi.fn();
+    const grid = createEmptyGrid(2, 2);
+    grid.edges[edgeKey(0, 0, 'h')] = { type: 'switch', closed: false };
+    render(
+      <CircuitGrid
+        grid={grid}
+        onPlace={vi.fn()}
+        onToggleSwitch={vi.fn()}
+        onRemove={onRemove}
+        fixedKeys={new Set([edgeKey(0, 0, 'h')])}
+        pendingComponent={null}
+      />,
+    );
+    const hit = screen.getByTestId(`hit-${edgeKey(0, 0, 'h')}`);
+    fireEvent.pointerDown(hit);
+    vi.advanceTimersByTime(600);
+    fireEvent.pointerUp(hit);
+
+    expect(onRemove).not.toHaveBeenCalled();
+    vi.useRealTimers();
+  });
 });

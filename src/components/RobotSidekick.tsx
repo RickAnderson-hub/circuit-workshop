@@ -68,6 +68,10 @@ export function RobotSidekick({ earnedParts, celebrating }: RobotSidekickProps) 
         <path d="M 9 135 L 15 150 L 21 135 L 15 143 Z" fill="#ff6b6b" />
         <path d="M 139 135 L 145 150 L 151 135 L 145 143 Z" fill="#ff6b6b" />
       </g>
+
+      <g data-testid="part-visor" className={`robot-part${isEarned('visor') ? ' earned' : ''}`}>
+        <rect x="44" y="18" width="70" height="14" rx="7" fill="#8fd8ff" stroke="#1a1a1a" strokeWidth="3" opacity="0.85" />
+      </g>
     </svg>
   );
 }

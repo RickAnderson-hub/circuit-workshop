@@ -35,8 +35,22 @@ describe('App', () => {
     await user.click(screen.getAllByRole('button', { name: /wire/i })[0]);
     await user.click(screen.getByTestId('hit-1,0,h'));
 
-    await user.click(screen.getByRole('button', { name: /back/i }));
+    await user.click(screen.getByRole('button', { name: '← Back' }));
     expect(screen.getByText('The Robot Workshop')).toBeInTheDocument();
     expect(screen.getByTestId('robot-sidekick')).toHaveClass('celebrating');
+  });
+
+  it('jumps straight to the next level via the completion banner, without a celebration detour', async () => {
+    const user = userEvent.setup();
+    render(<App />);
+
+    await user.click(screen.getByRole('button', { name: LEVELS[0].title }));
+    await user.click(screen.getAllByRole('button', { name: /wire/i })[0]);
+    await user.click(screen.getByTestId('hit-0,0,v'));
+    await user.click(screen.getAllByRole('button', { name: /wire/i })[0]);
+    await user.click(screen.getByTestId('hit-1,0,h'));
+
+    await user.click(screen.getByRole('button', { name: /next level/i }));
+    expect(screen.getByText(LEVELS[1].goal)).toBeInTheDocument();
   });
 });

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { ComponentType, edgeJunctions, edgeKey, GridState } from '../domain/types';
 import { solveCircuit } from '../domain/solveCircuit';
 import './CircuitGrid.css';
@@ -16,6 +16,7 @@ const CELL_SIZE = 64;
 const PADDING = 24;
 const DRAG_TYPE = 'application/x-component-type';
 const GRID_KEY_DRAG_TYPE = 'application/x-grid-key';
+const LONG_PRESS_MS = 500;
 
 function BatteryIcon({ testId }: { testId: string }) {
   return (
@@ -113,6 +114,8 @@ export function CircuitGrid({ grid, onPlace, onToggleSwitch, onRemove, fixedKeys
   const width = (grid.cols - 1) * CELL_SIZE + PADDING * 2;
   const height = (grid.rows - 1) * CELL_SIZE + PADDING * 2;
   const [dragOverKey, setDragOverKey] = useState<string | null>(null);
+  const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const longPressFired = useRef(false);
 
   const slotKeys: string[] = [];
   for (let row = 0; row < grid.rows; row += 1) {
@@ -123,6 +126,10 @@ export function CircuitGrid({ grid, onPlace, onToggleSwitch, onRemove, fixedKeys
   }
 
   function handleSlotClick(key: string) {
+    if (longPressFired.current) {
+      longPressFired.current = false;
+      return;
+    }
     const component = grid.edges[key];
     if (component) {
       if (fixedKeys.has(key)) return;
@@ -131,6 +138,23 @@ export function CircuitGrid({ grid, onPlace, onToggleSwitch, onRemove, fixedKeys
       return;
     }
     if (pendingComponent) onPlace(key, pendingComponent);
+  }
+
+  function clearLongPressTimer() {
+    if (longPressTimer.current) {
+      clearTimeout(longPressTimer.current);
+      longPressTimer.current = null;
+    }
+  }
+
+  function handleSwitchPointerDown(key: string) {
+    const component = grid.edges[key];
+    if (component?.type !== 'switch' || fixedKeys.has(key)) return;
+    longPressFired.current = false;
+    longPressTimer.current = setTimeout(() => {
+      longPressFired.current = true;
+      onRemove(key);
+    }, LONG_PRESS_MS);
   }
 
   return (
@@ -198,6 +222,10 @@ export function CircuitGrid({ grid, onPlace, onToggleSwitch, onRemove, fixedKeys
                 strokeWidth={28}
                 strokeLinecap="round"
                 onClick={() => handleSlotClick(key)}
+                onPointerDown={() => handleSwitchPointerDown(key)}
+                onPointerUp={clearLongPressTimer}
+                onPointerLeave={clearLongPressTimer}
+                onPointerCancel={clearLongPressTimer}
                 onDragStart={handleDragStart}
                 onDragOver={handleDragOver}
                 onDragLeave={handleDragLeave}

@@ -19,11 +19,13 @@ function AppShell() {
     );
   }
 
-  const level = LEVELS.find((candidate) => candidate.id === activeLevelId);
+  const levelIndex = LEVELS.findIndex((candidate) => candidate.id === activeLevelId);
+  const level = LEVELS[levelIndex];
   if (!level) {
     setActiveLevelId(null);
     return null;
   }
+  const nextLevel = LEVELS[levelIndex + 1] ?? null;
 
   return (
     <LevelScreen
@@ -34,6 +36,7 @@ function AppShell() {
         completeLevel(level.id);
         setJustCompletedLevelId(level.id);
       }}
+      onNext={nextLevel ? () => setActiveLevelId(nextLevel.id) : undefined}
     />
   );
 }

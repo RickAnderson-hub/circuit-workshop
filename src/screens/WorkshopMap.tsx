@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { LEVELS } from '../domain/levels';
+import { earnedPartsFrom } from '../domain/rewards';
 import { RobotSidekick } from '../components/RobotSidekick';
 import { useProgress } from '../store/ProgressContext';
 import { useMuted } from '../audio/useMuted';
@@ -14,9 +15,7 @@ export interface WorkshopMapProps {
 export function WorkshopMap({ onSelectLevel, celebratingLevelId = null, onCelebrationDone }: WorkshopMapProps) {
   const { state, isLevelUnlocked } = useProgress();
   const [muted, toggleMuted] = useMuted();
-  const earnedParts = LEVELS.filter((level) => state.completedLevelIds.includes(level.id)).map(
-    (level) => level.rewardPart,
-  );
+  const earnedParts = earnedPartsFrom(state.completedLevelIds);
   const celebrating = celebratingLevelId !== null;
 
   useEffect(() => {

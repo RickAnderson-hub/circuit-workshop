@@ -1,6 +1,13 @@
 # Follow-ups
 
-Backlog of things worth doing next, gathered from the build and review process. Nothing here blocks play — the game is fully working today at all 7 levels.
+Backlog of things worth doing next, gathered from the build and review process. Nothing here blocks play — the game is fully working today at all 8 levels.
+
+## Session: harder level, better descriptions, Next button, switch-removal bug
+
+- **Bug fixed: a placed switch could never be removed by tap.** `CircuitGrid.handleSlotClick` always toggled a placed switch, never removed it — dragging it back to the tray worked, but that's not a reliable interaction on touch devices, which this game is built for. Fixed with a press-and-hold (~500ms) to remove, leaving a quick tap to toggle as before. Verified with fake timers in tests and a real ~700ms hold in a live browser.
+- **Added a Next Level button.** Solving a level now shows an inline completion banner (celebrating `RobotSidekick` + Back/Next buttons) without leaving the level screen; Next jumps straight into the next level, skipping the map. The map's own celebration animation still plays if the player hits Back instead. `earnedPartsFrom()` (`src/domain/rewards.ts`) was extracted so both `WorkshopMap` and `LevelScreen` compute the robot's earned parts the same way.
+- **Rewrote every level's goal text** to teach the underlying circuit concept in plain language (what a circuit/loop is, why it has to close, what a switch does, series vs. parallel) rather than just describing the mechanical task.
+- **Added an 8th, hardest level** (`grand-finale` — "Bring the Whole Workshop to Life"): a 4×2 grid using every single edge, four lights total (a switch-gated AND bulb, two series LEDs, and a nested-branch bulb), tray of 2 switches + 3 wires. Rewards a new `visor` robot part. Verified via `isLevelSolvable` and interactively in the browser, not just hand-traced.
 
 ## Gameplay / product decisions (need Rick's call, not just engineering) — all done
 
