@@ -14,6 +14,7 @@ describe('isLevelSolvable', () => {
       id: 'unsolvable-test-fixture',
       title: 'test',
       goal: 'test',
+      stage: 1,
       rows: 2,
       cols: 2,
       fixed: {
@@ -35,6 +36,7 @@ describe('isLevelSolvable', () => {
       id: 'one-wire-short-test-fixture',
       title: 'test',
       goal: 'test',
+      stage: 1,
       rows: 2,
       cols: 2,
       fixed: {
@@ -57,6 +59,7 @@ describe('isLevelSolvable', () => {
       id: 'diode-reversed-test-fixture',
       title: 'test',
       goal: 'test',
+      stage: 1,
       rows: 2,
       cols: 2,
       fixed: {

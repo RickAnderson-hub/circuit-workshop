@@ -1,8 +1,10 @@
-import { RobotPart } from '../domain/levels';
+import { RobotMk2Part, RobotPart } from '../domain/levels';
 import './RobotSidekick.css';
 
 export interface RobotSidekickProps {
-  earnedParts: RobotPart[];
+  // Accepts the wider union since callers pass every earned part regardless
+  // of stage — this component only looks for the ones it recognizes.
+  earnedParts: (RobotPart | RobotMk2Part)[];
   celebrating: boolean;
 }
 

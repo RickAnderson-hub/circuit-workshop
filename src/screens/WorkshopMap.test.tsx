@@ -56,4 +56,64 @@ describe('WorkshopMap', () => {
     await user.click(muteButton);
     expect(muteButton).toHaveAttribute('aria-pressed', 'true');
   });
+
+  const stage1Levels = LEVELS.filter((level) => level.stage === 1);
+  const stage2Levels = LEVELS.filter((level) => level.stage === 2);
+
+  it('keeps the Stage 2 tab locked until every stage 1 level is completed', () => {
+    let progress = createDefaultProgress();
+    // Complete all but the last stage 1 level.
+    for (const level of stage1Levels.slice(0, -1)) {
+      progress = completeLevel(progress, level.id);
+    }
+    saveProgress(progress);
+
+    render(
+      <ProgressProvider>
+        <WorkshopMap onSelectLevel={vi.fn()} />
+      </ProgressProvider>,
+    );
+
+    expect(screen.getByRole('tab', { name: /stage 2/i })).toBeDisabled();
+  });
+
+  it('unlocks the Stage 2 tab, showing only its first level enabled, once stage 1 is fully complete', async () => {
+    const user = userEvent.setup();
+    let progress = createDefaultProgress();
+    for (const level of stage1Levels) {
+      progress = completeLevel(progress, level.id);
+    }
+    saveProgress(progress);
+
+    render(
+      <ProgressProvider>
+        <WorkshopMap onSelectLevel={vi.fn()} />
+      </ProgressProvider>,
+    );
+
+    const stage2Tab = screen.getByRole('tab', { name: /stage 2/i });
+    expect(stage2Tab).toBeEnabled();
+    await user.click(stage2Tab);
+
+    expect(screen.getByTestId('robot-sidekick-mk2')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: stage2Levels[0].title })).toBeEnabled();
+    expect(screen.getByRole('button', { name: stage2Levels[1].title })).toBeDisabled();
+  });
+
+  it('switches to the Stage 2 tab and celebrates on the mk2 robot when a stage 2 level is the one just completed', () => {
+    let progress = createDefaultProgress();
+    for (const level of stage1Levels) {
+      progress = completeLevel(progress, level.id);
+    }
+    saveProgress(progress);
+
+    render(
+      <ProgressProvider>
+        <WorkshopMap onSelectLevel={vi.fn()} celebratingLevelId={stage2Levels[0].id} />
+      </ProgressProvider>,
+    );
+
+    expect(screen.getByTestId('robot-sidekick-mk2')).toHaveClass('celebrating');
+    expect(screen.queryByTestId('robot-sidekick')).not.toBeInTheDocument();
+  });
 });

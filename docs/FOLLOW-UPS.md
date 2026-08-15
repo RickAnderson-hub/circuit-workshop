@@ -1,6 +1,15 @@
 # Follow-ups
 
-Backlog of things worth doing next, gathered from the build and review process. Nothing here blocks play — the game is fully working today at all 8 levels.
+Backlog of things worth doing next, gathered from the build and review process. Nothing here blocks play — the game is fully working today at all 16 levels across both stages.
+
+## Session: Stage 2 — new components, 8 harder levels, a second robot
+
+- **New circuit components: diode, buzzer, motor.** A diode is direction-aware (`PlacedComponent.forward`, mirroring switch's `closed`) — tap flips its direction, long-press removes it (reusing the existing press-and-hold mechanism). Buzzer and motor are new fixed output types alongside bulb/LED.
+- **`solveCircuit` needed a real rework, not just a new branch**, to support directional edges correctly. The existing "exclude this edge and check both endpoints from the battery" technique implicitly assumed every edge has an undirected alternate path around the loop — a diode breaks that, since excluding the wire immediately upstream of it cuts off the only way back, as the diode itself can't be traversed backward. Reworked the per-edge liveness check to walk forward from each edge's far endpoint instead of checking its membership in a battery-rooted set — correct for both directed and undirected edges. Caught and regression-tested a related false-positive (a dangling wire stub reachable only by backtracking through itself).
+- **`levelSolvability`'s brute force now tries both diode directions** as real branches (unlike a switch's dominated "open" state, a diode has no direction that's ever safe to skip), verified with a fixture solvable only via the reversed direction, and confirmed the check has teeth by temporarily breaking it.
+- **Added 8 new stage-2 levels**, each combining the new components with stage-1 concepts (direction, switch+diode combos, new-output parallel branches, and a finale combining everything: switch AND-gate + series LEDs + a diode-guarded motor + a buzzer branch). Every level verified via `isLevelSolvable` before being considered done, plus a full interactive playthrough in a real browser including the finale.
+- **Stage 2 unlocks after stage 1, with no new gating logic.** Since progression was already strictly sequential (level N requires level N−1), appending stage 2 after stage 1 in the `LEVELS` array means the existing unlock rule already implies "stage 2 opens once stage 1 is fully done" — `stage` on `LevelDef` is presentational only (grouping, picking which reward robot). Added a regression test guarding the ordering invariant this relies on.
+- **A second, upgraded robot (`RobotSidekickMk2`)** is built up across stage 2's 8 levels (`core`, `blaster`, `wings`, `shield`, `radar`, `boosters`, `claws`, `crown`) — distinct angular/hexagonal silhouette and cooler palette from the original. `WorkshopMap` presents Stage 1 / Stage 2 as tabs (Stage 2 shown locked with 🔒 until unlocked); switching tabs auto-follows whichever stage's level was just completed so the right robot's celebration is visible. `LevelScreen`'s completion banner picks the matching robot based on `level.stage`.
 
 ## Session: harder level, better descriptions, Next button, switch-removal bug
 

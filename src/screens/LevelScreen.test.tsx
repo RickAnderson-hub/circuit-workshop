@@ -74,6 +74,21 @@ describe('LevelScreen', () => {
     expect(screen.queryByRole('button', { name: /next level/i })).not.toBeInTheDocument();
   });
 
+  it('shows the mk2 robot, not the mk1 robot, in the completion banner for a stage 2 level', async () => {
+    const user = userEvent.setup();
+    const stage2Level = LEVELS.find((level) => level.id === 'buzzer-intro')!;
+    renderLevelScreen({ level: stage2Level, onComplete: vi.fn(), onBack: vi.fn() });
+
+    // Same shape as level 0 (battery + output, two empty wire slots).
+    await user.click(screen.getAllByRole('button', { name: /wire/i })[0]);
+    await user.click(screen.getByTestId('hit-0,0,v'));
+    await user.click(screen.getAllByRole('button', { name: /wire/i })[0]);
+    await user.click(screen.getByTestId('hit-1,0,h'));
+
+    expect(screen.getByTestId('robot-sidekick-mk2')).toBeInTheDocument();
+    expect(screen.queryByTestId('robot-sidekick')).not.toBeInTheDocument();
+  });
+
   it('allows removing a misplaced wire and placing it correctly afterward', async () => {
     const user = userEvent.setup();
     const onComplete = vi.fn();

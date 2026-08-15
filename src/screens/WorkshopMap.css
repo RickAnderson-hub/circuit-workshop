@@ -18,6 +18,32 @@
   cursor: pointer;
 }
 
+.stage-tabs {
+  display: flex;
+  gap: 0.4rem;
+}
+
+.stage-tabs .stage-tab {
+  font: inherit;
+  font-weight: bold;
+  padding: 0.5rem 1.1rem;
+  border: 3px solid #1a1a1a;
+  border-radius: 12px;
+  background: #fff;
+  cursor: pointer;
+}
+
+.stage-tabs .stage-tab.active {
+  background: #ffe9a8;
+  box-shadow: 3px 3px 0 #1a1a1a;
+}
+
+.stage-tabs .stage-tab:disabled {
+  background: #ddd;
+  color: #888;
+  cursor: not-allowed;
+}
+
 .level-list {
   display: flex;
   flex-direction: column;

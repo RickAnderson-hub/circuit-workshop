@@ -6,6 +6,7 @@ import { ComponentType, GridState } from '../domain/types';
 import { CircuitGrid } from '../components/CircuitGrid';
 import { ComponentTray } from '../components/ComponentTray';
 import { RobotSidekick } from '../components/RobotSidekick';
+import { RobotSidekickMk2 } from '../components/RobotSidekickMk2';
 import { useProgress } from '../store/ProgressContext';
 import { playSound } from '../audio/sound';
 import { useMuted } from '../audio/useMuted';
@@ -119,7 +120,11 @@ export function LevelScreen({ level, onComplete, onBack, onNext }: LevelScreenPr
       <p className="goal">{level.goal}</p>
       {solved && (
         <div className="level-complete-banner" data-testid="level-complete-banner">
-          <RobotSidekick earnedParts={earnedParts} celebrating />
+          {level.stage === 2 ? (
+            <RobotSidekickMk2 earnedParts={earnedParts} celebrating />
+          ) : (
+            <RobotSidekick earnedParts={earnedParts} celebrating />
+          )}
           <p className="level-complete-message">🎉 Solved!</p>
           <div className="level-complete-actions">
             <button type="button" onClick={onBack}>
