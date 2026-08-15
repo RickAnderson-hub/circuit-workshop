@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { LEVELS } from '../domain/levels';
 import { RobotSidekick } from '../components/RobotSidekick';
 import { useProgress } from '../store/ProgressContext';
+import { useMuted } from '../audio/useMuted';
 import './WorkshopMap.css';
 
 export interface WorkshopMapProps {
@@ -12,6 +13,7 @@ export interface WorkshopMapProps {
 
 export function WorkshopMap({ onSelectLevel, celebratingLevelId = null, onCelebrationDone }: WorkshopMapProps) {
   const { state, isLevelUnlocked } = useProgress();
+  const [muted, toggleMuted] = useMuted();
   const earnedParts = LEVELS.filter((level) => state.completedLevelIds.includes(level.id)).map(
     (level) => level.rewardPart,
   );
@@ -25,6 +27,15 @@ export function WorkshopMap({ onSelectLevel, celebratingLevelId = null, onCelebr
 
   return (
     <div className="workshop-map">
+      <button
+        type="button"
+        className="mute-button"
+        onClick={toggleMuted}
+        aria-pressed={muted}
+        aria-label={muted ? 'Unmute sound' : 'Mute sound'}
+      >
+        {muted ? '🔇' : '🔊'}
+      </button>
       <h1>The Robot Workshop</h1>
       <RobotSidekick earnedParts={earnedParts} celebrating={celebrating} />
       <div className="level-list">

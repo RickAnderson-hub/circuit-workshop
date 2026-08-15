@@ -1,10 +1,18 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { LEVELS } from '../domain/levels';
+import { playSound } from '../audio/sound';
 import { LevelScreen } from './LevelScreen';
 
+vi.mock('../audio/sound', () => ({ playSound: vi.fn() }));
+
 describe('LevelScreen', () => {
+  beforeEach(() => {
+    localStorage.clear();
+    vi.mocked(playSound).mockClear();
+  });
+
   it('shows the level goal and tray items', () => {
     render(<LevelScreen level={LEVELS[0]} onComplete={vi.fn()} onBack={vi.fn()} />);
     expect(screen.getByText(LEVELS[0].goal)).toBeInTheDocument();
@@ -67,5 +75,38 @@ describe('LevelScreen', () => {
     render(<LevelScreen level={LEVELS[0]} onComplete={vi.fn()} onBack={onBack} />);
     await user.click(screen.getByRole('button', { name: /back/i }));
     expect(onBack).toHaveBeenCalled();
+  });
+
+  it('plays place, remove, and solve sounds at the right moments', async () => {
+    const user = userEvent.setup();
+    render(<LevelScreen level={LEVELS[0]} onComplete={vi.fn()} onBack={vi.fn()} />);
+
+    await user.click(screen.getAllByRole('button', { name: /wire/i })[0]);
+    await user.click(screen.getByTestId('hit-0,0,v'));
+    expect(playSound).toHaveBeenLastCalledWith('place', false);
+
+    await user.click(screen.getByTestId('hit-0,0,v'));
+    expect(playSound).toHaveBeenLastCalledWith('remove', false);
+
+    await user.click(screen.getAllByRole('button', { name: /wire/i })[0]);
+    await user.click(screen.getByTestId('hit-0,0,v'));
+    await user.click(screen.getAllByRole('button', { name: /wire/i })[0]);
+    await user.click(screen.getByTestId('hit-1,0,h'));
+    expect(playSound).toHaveBeenLastCalledWith('solve', false);
+  });
+
+  it('toggles the mute button and passes the muted state to playSound', async () => {
+    const user = userEvent.setup();
+    render(<LevelScreen level={LEVELS[0]} onComplete={vi.fn()} onBack={vi.fn()} />);
+
+    const muteButton = screen.getByRole('button', { name: /mute sound/i });
+    expect(muteButton).toHaveAttribute('aria-pressed', 'false');
+
+    await user.click(muteButton);
+    expect(muteButton).toHaveAttribute('aria-pressed', 'true');
+
+    await user.click(screen.getAllByRole('button', { name: /wire/i })[0]);
+    await user.click(screen.getByTestId('hit-0,0,v'));
+    expect(playSound).toHaveBeenLastCalledWith('place', true);
   });
 });

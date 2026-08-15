@@ -2,11 +2,11 @@
 
 Backlog of things worth doing next, gathered from the build and review process. Nothing here blocks play — the game is fully working today at all 7 levels.
 
-## Gameplay / product decisions (need Rick's call, not just engineering)
+## Gameplay / product decisions (need Rick's call, not just engineering) — all done
 
 - ~~Tray inventory is unlimited.~~ Done: each level's tray is now a finite, per-type budget (`Wire ×2`, etc.) computed from how many of that type appear in `level.tray` minus how many are currently placed on non-fixed grid edges. A type's tray button disables once its count hits zero and re-enables when a placed piece of that type is removed. No level data changed — every shipped level's tray already listed exactly the pieces needed. There's still no separate "clear board" button; per-piece removal (click or drag-back-to-tray) is the only undo, which was judged sufficient.
 - ~~Only 5 levels.~~ Done: added `switch-gate` (two switches in series gating one bulb — a logical-AND, distinct from `mixed`'s two *independent* switch branches) and `combo` (a bigger 3×3 circuit combining a series LED pair with a separate parallel LED branch, 3 fixed LEDs total). Both reward new robot parts (`legs`, `jetpack`) added to `RobotSidekick.tsx` in the same bold-outline SVG style as the original five. Verified via `isLevelSolvable` (not just hand-traced, given the 'parallel' level history) and interactively in the browser — including confirming `switch-gate` truly requires *both* switches closed, not either one.
-- **Sound effects.** No audio at all right now — a click/buzz on placement and a chime on solve would add a lot for a kid at low implementation cost.
+- ~~Sound effects.~~ Done: `src/audio/sound.ts` synthesizes short tones with the Web Audio API (no asset files) — a blip on placing a component, a lower blip on removing one, and a rising 3-note chime on solving a level. `src/audio/useMuted.ts` is a small `localStorage`-backed hook (own key, independent of the progress schema); a 🔊/🔇 toggle button was added to both `WorkshopMap` and `LevelScreen`. Verified in a real browser by patching `AudioContext.prototype.createOscillator` to capture actual oscillator frequencies — confirmed place/remove/solve tones fire with the right pitches, and that muting genuinely suppresses them without affecting gameplay.
 
 ## Art
 

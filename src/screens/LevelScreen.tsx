@@ -4,6 +4,8 @@ import { isSolved } from '../domain/solveCircuit';
 import { ComponentType, GridState } from '../domain/types';
 import { CircuitGrid } from '../components/CircuitGrid';
 import { ComponentTray } from '../components/ComponentTray';
+import { playSound } from '../audio/sound';
+import { useMuted } from '../audio/useMuted';
 import './LevelScreen.css';
 
 export interface LevelScreenProps {
@@ -19,6 +21,7 @@ export function LevelScreen({ level, onComplete, onBack }: LevelScreenProps) {
     edges: { ...level.fixed },
   }));
   const [selected, setSelected] = useState<ComponentType | null>(null);
+  const [muted, toggleMuted] = useMuted();
   const completedRef = useRef(false);
   const fixedKeys = useMemo(() => new Set(Object.keys(level.fixed)), [level]);
 
@@ -44,14 +47,16 @@ export function LevelScreen({ level, onComplete, onBack }: LevelScreenProps) {
   useEffect(() => {
     if (!completedRef.current && isSolved(grid)) {
       completedRef.current = true;
+      playSound('solve', muted);
       onComplete();
     }
-  }, [grid, level, onComplete]);
+  }, [grid, level, onComplete, muted]);
 
   function handlePlace(key: string, type: ComponentType) {
     if ((remaining[type] ?? 0) <= 0) return;
     setGrid((previous) => ({ ...previous, edges: { ...previous.edges, [key]: { type } } }));
     setSelected(null);
+    playSound('place', muted);
   }
 
   function handleRemove(key: string) {
@@ -61,6 +66,7 @@ export function LevelScreen({ level, onComplete, onBack }: LevelScreenProps) {
       delete edges[key];
       return { ...previous, edges };
     });
+    playSound('remove', muted);
   }
 
   function handleToggleSwitch(key: string) {
@@ -76,9 +82,20 @@ export function LevelScreen({ level, onComplete, onBack }: LevelScreenProps) {
 
   return (
     <div className="level-screen">
-      <button type="button" className="back-button" onClick={onBack}>
-        &larr; Back
-      </button>
+      <div className="level-screen-header">
+        <button type="button" className="back-button" onClick={onBack}>
+          &larr; Back
+        </button>
+        <button
+          type="button"
+          className="mute-button"
+          onClick={toggleMuted}
+          aria-pressed={muted}
+          aria-label={muted ? 'Unmute sound' : 'Mute sound'}
+        >
+          {muted ? '🔇' : '🔊'}
+        </button>
+      </div>
       <h2>{level.title}</h2>
       <p className="goal">{level.goal}</p>
       <CircuitGrid

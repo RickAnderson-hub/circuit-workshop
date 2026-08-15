@@ -12,12 +12,30 @@
   font-size: 1rem;
 }
 
+.level-screen-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  max-width: 420px;
+}
+
 .level-screen .back-button {
-  align-self: flex-start;
   font: inherit;
   border: 3px solid #1a1a1a;
   border-radius: 12px;
   background: #fff;
   padding: 0.4rem 0.9rem;
+  cursor: pointer;
+}
+
+.level-screen .mute-button {
+  font: inherit;
+  font-size: 1.2rem;
+  line-height: 1;
+  border: 3px solid #1a1a1a;
+  border-radius: 12px;
+  background: #fff;
+  padding: 0.35rem 0.6rem;
   cursor: pointer;
 }

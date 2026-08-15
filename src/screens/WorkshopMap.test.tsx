@@ -1,4 +1,5 @@
 import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { LEVELS } from '../domain/levels';
 import { completeLevel, createDefaultProgress, saveProgress } from '../storage/persistence';
@@ -41,5 +42,18 @@ describe('WorkshopMap', () => {
     );
 
     expect(screen.getByTestId('robot-sidekick')).toHaveClass('celebrating');
+  });
+
+  it('toggles the mute button', async () => {
+    const user = userEvent.setup();
+    render(
+      <ProgressProvider>
+        <WorkshopMap onSelectLevel={vi.fn()} />
+      </ProgressProvider>,
+    );
+    const muteButton = screen.getByRole('button', { name: /mute sound/i });
+    expect(muteButton).toHaveAttribute('aria-pressed', 'false');
+    await user.click(muteButton);
+    expect(muteButton).toHaveAttribute('aria-pressed', 'true');
   });
 });
