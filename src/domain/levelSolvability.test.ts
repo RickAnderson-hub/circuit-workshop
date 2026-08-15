@@ -1,5 +1,5 @@
 import { edgeKey } from './types';
-import { LEVELS } from './levels';
+import { LEVELS, LevelDef } from './levels';
 import { isLevelSolvable } from './levelSolvability';
 
 describe('isLevelSolvable', () => {
@@ -10,19 +10,19 @@ describe('isLevelSolvable', () => {
   });
 
   it('returns false for a level whose tray cannot possibly close the loop', () => {
-    const unsolvable = {
+    const unsolvable: LevelDef = {
       id: 'unsolvable-test-fixture',
       title: 'test',
       goal: 'test',
       rows: 2,
       cols: 2,
       fixed: {
-        [edgeKey(0, 0, 'h')]: { type: 'battery' as const },
-        [edgeKey(0, 1, 'v')]: { type: 'bulb' as const },
+        [edgeKey(0, 0, 'h')]: { type: 'battery' },
+        [edgeKey(0, 1, 'v')]: { type: 'bulb' },
       },
       // Missing the second wire needed to close the loop, so no arrangement can light the bulb.
       tray: [],
-      rewardPart: 'nose' as const,
+      rewardPart: 'nose',
     };
     expect(isLevelSolvable(unsolvable)).toBe(false);
   });
@@ -31,18 +31,18 @@ describe('isLevelSolvable', () => {
     // Needs two wires to close the loop via (0,0,'v') and (1,0,'h'), but the
     // tray only provides one — should be unsolvable now that placing a
     // component consumes it from the tray.
-    const oneWireShort = {
+    const oneWireShort: LevelDef = {
       id: 'one-wire-short-test-fixture',
       title: 'test',
       goal: 'test',
       rows: 2,
       cols: 2,
       fixed: {
-        [edgeKey(0, 0, 'h')]: { type: 'battery' as const },
-        [edgeKey(0, 1, 'v')]: { type: 'bulb' as const },
+        [edgeKey(0, 0, 'h')]: { type: 'battery' },
+        [edgeKey(0, 1, 'v')]: { type: 'bulb' },
       },
-      tray: ['wire'] as const,
-      rewardPart: 'nose' as const,
+      tray: ['wire'],
+      rewardPart: 'nose',
     };
     expect(isLevelSolvable(oneWireShort)).toBe(false);
   });
