@@ -27,6 +27,7 @@ function AppShell() {
 
   return (
     <LevelScreen
+      key={level.id}
       level={level}
       onBack={() => setActiveLevelId(null)}
       onComplete={() => {

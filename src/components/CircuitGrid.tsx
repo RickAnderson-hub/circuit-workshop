@@ -148,7 +148,7 @@ export function CircuitGrid({ grid, onPlace, onToggleSwitch, onRemove, fixedKeys
           const component = grid.edges[key];
           const isLive = live.has(key);
           const classes = ['slot'];
-          if (!component) classes.push(pendingComponent ? 'placeable' : 'empty');
+          if (!component && pendingComponent) classes.push('placeable');
           if (component) classes.push('occupied');
           if (component?.type === 'switch') classes.push(component.closed ? 'switch-closed' : 'switch-open');
           if (isLive) classes.push('live');

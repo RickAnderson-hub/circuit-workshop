@@ -23,7 +23,7 @@ export function LevelScreen({ level, onComplete, onBack }: LevelScreenProps) {
   const fixedKeys = useMemo(() => new Set(Object.keys(level.fixed)), [level]);
 
   useEffect(() => {
-    if (!completedRef.current && isSolved(level, grid)) {
+    if (!completedRef.current && isSolved(grid)) {
       completedRef.current = true;
       onComplete();
     }

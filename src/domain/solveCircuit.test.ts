@@ -1,4 +1,4 @@
-import { solveCircuit } from './solveCircuit';
+import { isSolved, solveCircuit } from './solveCircuit';
 import { createEmptyGrid, edgeKey, GridState } from './types';
 
 function withComponents(grid: GridState, placements: [ReturnType<typeof edgeKey>, GridState['edges'][string]][]): GridState {
@@ -76,5 +76,31 @@ describe('solveCircuit', () => {
       edges: { ...closedGrid.edges, [edgeKey(0, 0, 'v')]: { type: 'switch', closed: false } },
     };
     expect(solveCircuit(openGrid)).toEqual(new Set());
+  });
+});
+
+describe('isSolved', () => {
+  it('is false for an empty grid with no bulb or LED placed yet', () => {
+    expect(isSolved(createEmptyGrid(2, 2))).toBe(false);
+  });
+
+  it('is true once every bulb/LED currently on the grid is live, regardless of how it got there', () => {
+    // Mirrors a bulb placed via the tray rather than baked into the level's fixed components.
+    const grid = withComponents(createEmptyGrid(2, 2), [
+      [edgeKey(0, 0, 'h'), { type: 'battery' }],
+      [edgeKey(0, 0, 'v'), { type: 'wire' }],
+      [edgeKey(0, 1, 'v'), { type: 'bulb' }],
+      [edgeKey(1, 0, 'h'), { type: 'wire' }],
+    ]);
+    expect(isSolved(grid)).toBe(true);
+  });
+
+  it('is false when a placed bulb/LED is not carrying current', () => {
+    const grid = withComponents(createEmptyGrid(2, 2), [
+      [edgeKey(0, 0, 'h'), { type: 'battery' }],
+      [edgeKey(0, 1, 'v'), { type: 'bulb' }],
+      // Loop left open: no wires connecting the other two sides.
+    ]);
+    expect(isSolved(grid)).toBe(false);
   });
 });

@@ -39,7 +39,7 @@ export function isLevelSolvable(level: LevelDef): boolean {
 
   function search(index: number): boolean {
     if (index === emptyKeys.length) {
-      return isSolved(level, { rows: level.rows, cols: level.cols, edges });
+      return isSolved({ rows: level.rows, cols: level.cols, edges });
     }
     const key = emptyKeys[index];
     for (const candidate of candidates) {

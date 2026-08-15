@@ -19,12 +19,12 @@ Backlog of things worth doing next, gathered from the build and review process. 
 - ~~RobotSidekick's test only exercises 1 of 5 reward parts~~ Done: a parameterized test asserts each part is earned only when present in `earnedParts` (with the rest staying dim), plus a case for all five earned at once.
 - **SVG `<line>` elements have a zero-area bounding box**, which blocks Playwright and similar browser-automation tools from clicking them even though real touch/mouse clicks work fine (confirmed manually). If an automated end-to-end test suite is ever added, swap in a `<rect>` (or similar) hit-area element so it's automation-friendly too.
 
-## Small engineering cleanups (low risk, low priority)
+## Small engineering cleanups (low risk, low priority) — all done
 
-- `saveProgress` writes to localStorage from inside a React state updater rather than a `useEffect`; harmless today but not the idiomatic place for a side effect (StrictMode double-invokes updaters in dev).
-- `LevelScreen` isn't given a `key={level.id}` in `App.tsx` — unreachable today since the app always routes back through the level list between levels, but would matter if a "Next Level" button is ever added directly.
-- `isSolved` only checks bulbs/LEDs listed in a level's `fixed` components — a level that supplied a bulb via the tray instead would be ignored by the win check. No level does this currently.
-- Minor dead code / redundant test setup: an inert `.slot.empty` CSS class, a duplicated localStorage mock mechanism in tests, a `ComponentTray` list key that's more specific than it needs to be.
+- ~~`saveProgress` writes to localStorage from inside a React state updater rather than a `useEffect`~~ Done: `ProgressContext` now saves via a `useEffect` keyed on `state` (skipping the initial mount so the just-loaded state isn't immediately rewritten), and `completeLevel`'s updater is a pure state transform.
+- ~~`LevelScreen` isn't given a `key={level.id}` in `App.tsx`~~ Done: added.
+- ~~`isSolved` only checks bulbs/LEDs listed in a level's `fixed` components~~ Done: `isSolved` (in `solveCircuit.ts`) now checks every bulb/LED currently on the *grid*, not just the level's fixed ones, so a tray-supplied bulb is held to the same standard. It also now requires at least one bulb/LED present (guards against a vacuously "solved" empty grid) and dropped its now-unused `level` parameter.
+- ~~Minor dead code / redundant test setup~~ Done: removed the inert `'empty'` class push in `CircuitGrid` (there was never a `.slot.empty` CSS rule), removed the dead `environmentOptions.jsdom.localStorage: true` from `vite.config.ts` (jsdom doesn't actually wire that up to `window.localStorage` in this setup — `src/test/setup.ts`'s manual mock is the one doing real work), and simplified `ComponentTray`'s list key from `` `${type}-${index}` `` to plain `index` (the tray order is static per level, so the type prefix added nothing).
 
 ## Reference
 

@@ -1,4 +1,4 @@
-import { createContext, useCallback, useContext, useMemo, useState } from 'react';
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import {
   completeLevel as completeLevelInState,
   isLevelUnlocked as isLevelUnlockedInState,
@@ -17,13 +17,18 @@ const ProgressContext = createContext<ProgressContextValue | null>(null);
 
 export function ProgressProvider({ children }: { children: React.ReactNode }) {
   const [state, setState] = useState<ProgressState>(() => loadProgress());
+  const isFirstRender = useRef(true);
+
+  useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
+    }
+    saveProgress(state);
+  }, [state]);
 
   const completeLevel = useCallback((levelId: string) => {
-    setState((previous) => {
-      const next = completeLevelInState(previous, levelId);
-      saveProgress(next);
-      return next;
-    });
+    setState((previous) => completeLevelInState(previous, levelId));
   }, []);
 
   const isLevelUnlocked = useCallback(

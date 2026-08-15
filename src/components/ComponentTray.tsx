@@ -36,7 +36,7 @@ export function ComponentTray({ items, selected, onSelect, onRemove }: Component
     >
       {items.map((type, index) => (
         <button
-          key={`${type}-${index}`}
+          key={index}
           type="button"
           draggable
           className={`tray-item${type === selected ? ' selected' : ''}`}
