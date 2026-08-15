@@ -27,6 +27,25 @@ describe('LevelScreen', () => {
     expect(onComplete).toHaveBeenCalledTimes(1);
   });
 
+  it('allows removing a misplaced wire and placing it correctly afterward', async () => {
+    const user = userEvent.setup();
+    const onComplete = vi.fn();
+    render(<LevelScreen level={LEVELS[0]} onComplete={onComplete} onBack={vi.fn()} />);
+
+    // Place a wire on the wrong-ish slot first, then undo it, then place both
+    // wires correctly to confirm the edge can still be completed afterward.
+    await user.click(screen.getAllByRole('button', { name: /wire/i })[0]);
+    await user.click(screen.getByTestId('slot-0,0,v'));
+    await user.click(screen.getByTestId('slot-0,0,v'));
+
+    await user.click(screen.getAllByRole('button', { name: /wire/i })[0]);
+    await user.click(screen.getByTestId('slot-0,0,v'));
+    await user.click(screen.getAllByRole('button', { name: /wire/i })[0]);
+    await user.click(screen.getByTestId('slot-1,0,h'));
+
+    expect(onComplete).toHaveBeenCalledTimes(1);
+  });
+
   it('calls onBack when the back button is tapped', async () => {
     const user = userEvent.setup();
     const onBack = vi.fn();

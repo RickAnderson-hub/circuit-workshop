@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { LevelDef } from '../domain/levels';
 import { solveCircuit } from '../domain/solveCircuit';
 import { ComponentType, GridState } from '../domain/types';
@@ -27,6 +27,7 @@ export function LevelScreen({ level, onComplete, onBack }: LevelScreenProps) {
   }));
   const [selected, setSelected] = useState<ComponentType | null>(null);
   const completedRef = useRef(false);
+  const fixedKeys = useMemo(() => new Set(Object.keys(level.fixed)), [level]);
 
   useEffect(() => {
     if (!completedRef.current && isSolved(level, grid)) {
@@ -38,6 +39,15 @@ export function LevelScreen({ level, onComplete, onBack }: LevelScreenProps) {
   function handlePlace(key: string, type: ComponentType) {
     setGrid((previous) => ({ ...previous, edges: { ...previous.edges, [key]: { type } } }));
     setSelected(null);
+  }
+
+  function handleRemove(key: string) {
+    if (fixedKeys.has(key)) return;
+    setGrid((previous) => {
+      const edges = { ...previous.edges };
+      delete edges[key];
+      return { ...previous, edges };
+    });
   }
 
   function handleToggleSwitch(key: string) {
@@ -58,8 +68,15 @@ export function LevelScreen({ level, onComplete, onBack }: LevelScreenProps) {
       </button>
       <h2>{level.title}</h2>
       <p className="goal">{level.goal}</p>
-      <CircuitGrid grid={grid} onPlace={handlePlace} onToggleSwitch={handleToggleSwitch} pendingComponent={selected} />
-      <ComponentTray items={level.tray} selected={selected} onSelect={setSelected} />
+      <CircuitGrid
+        grid={grid}
+        onPlace={handlePlace}
+        onToggleSwitch={handleToggleSwitch}
+        onRemove={handleRemove}
+        fixedKeys={fixedKeys}
+        pendingComponent={selected}
+      />
+      <ComponentTray items={level.tray} selected={selected} onSelect={setSelected} onRemove={handleRemove} />
     </div>
   );
 }

@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 import { createEmptyGrid, edgeKey } from '../domain/types';
@@ -13,6 +13,8 @@ describe('CircuitGrid', () => {
         grid={createEmptyGrid(2, 2)}
         onPlace={onPlace}
         onToggleSwitch={vi.fn()}
+        onRemove={vi.fn()}
+        fixedKeys={new Set()}
         pendingComponent="wire"
       />,
     );
@@ -26,7 +28,14 @@ describe('CircuitGrid', () => {
     const grid = createEmptyGrid(2, 2);
     grid.edges[edgeKey(0, 0, 'h')] = { type: 'battery' };
     render(
-      <CircuitGrid grid={grid} onPlace={onPlace} onToggleSwitch={vi.fn()} pendingComponent="wire" />,
+      <CircuitGrid
+        grid={grid}
+        onPlace={onPlace}
+        onToggleSwitch={vi.fn()}
+        onRemove={vi.fn()}
+        fixedKeys={new Set([edgeKey(0, 0, 'h')])}
+        pendingComponent="wire"
+      />,
     );
     await user.click(screen.getByTestId(`slot-${edgeKey(0, 0, 'h')}`));
     expect(onPlace).not.toHaveBeenCalled();
@@ -38,7 +47,14 @@ describe('CircuitGrid', () => {
     const grid = createEmptyGrid(2, 2);
     grid.edges[edgeKey(0, 0, 'h')] = { type: 'switch', closed: false };
     render(
-      <CircuitGrid grid={grid} onPlace={vi.fn()} onToggleSwitch={onToggleSwitch} pendingComponent={null} />,
+      <CircuitGrid
+        grid={grid}
+        onPlace={vi.fn()}
+        onToggleSwitch={onToggleSwitch}
+        onRemove={vi.fn()}
+        fixedKeys={new Set()}
+        pendingComponent={null}
+      />,
     );
     await user.click(screen.getByTestId(`slot-${edgeKey(0, 0, 'h')}`));
     expect(onToggleSwitch).toHaveBeenCalledWith(edgeKey(0, 0, 'h'));
@@ -50,7 +66,170 @@ describe('CircuitGrid', () => {
     grid.edges[edgeKey(0, 0, 'v')] = { type: 'wire' };
     grid.edges[edgeKey(0, 1, 'v')] = { type: 'wire' };
     grid.edges[edgeKey(1, 0, 'h')] = { type: 'wire' };
-    render(<CircuitGrid grid={grid} onPlace={vi.fn()} onToggleSwitch={vi.fn()} pendingComponent={null} />);
+    render(
+      <CircuitGrid
+        grid={grid}
+        onPlace={vi.fn()}
+        onToggleSwitch={vi.fn()}
+        onRemove={vi.fn()}
+        fixedKeys={new Set([edgeKey(0, 0, 'h')])}
+        pendingComponent={null}
+      />,
+    );
     expect(screen.getByTestId(`slot-${edgeKey(0, 0, 'v')}`)).toHaveClass('live');
+  });
+
+  it('renders a distinct icon for battery, bulb, led, and switch but not wire', () => {
+    const grid = createEmptyGrid(2, 2);
+    grid.edges[edgeKey(0, 0, 'h')] = { type: 'battery' };
+    grid.edges[edgeKey(0, 1, 'v')] = { type: 'bulb' };
+    grid.edges[edgeKey(0, 0, 'v')] = { type: 'led' };
+    grid.edges[edgeKey(1, 0, 'h')] = { type: 'switch', closed: false };
+    render(
+      <CircuitGrid
+        grid={grid}
+        onPlace={vi.fn()}
+        onToggleSwitch={vi.fn()}
+        onRemove={vi.fn()}
+        fixedKeys={new Set([edgeKey(0, 0, 'h'), edgeKey(0, 1, 'v')])}
+        pendingComponent={null}
+      />,
+    );
+    expect(screen.getByTestId(`icon-battery-${edgeKey(0, 0, 'h')}`)).toBeInTheDocument();
+    expect(screen.getByTestId(`icon-bulb-${edgeKey(0, 1, 'v')}`)).toBeInTheDocument();
+    expect(screen.getByTestId(`icon-led-${edgeKey(0, 0, 'v')}`)).toBeInTheDocument();
+    expect(screen.getByTestId(`icon-switch-${edgeKey(1, 0, 'h')}`)).toBeInTheDocument();
+  });
+
+  it('drops a dragged component onto an empty slot', () => {
+    const grid = createEmptyGrid(2, 2);
+    const onPlace = vi.fn();
+    render(
+      <CircuitGrid
+        grid={grid}
+        onPlace={onPlace}
+        onToggleSwitch={vi.fn()}
+        onRemove={vi.fn()}
+        fixedKeys={new Set()}
+        pendingComponent={null}
+      />,
+    );
+    const slot = screen.getByTestId(`slot-${edgeKey(0, 0, 'h')}`);
+    const dataTransfer = {
+      data: { 'application/x-component-type': 'wire' } as Record<string, string>,
+      setData() {},
+      getData(format: string) {
+        return this.data[format] ?? '';
+      },
+    };
+    fireEvent.dragOver(slot, { dataTransfer });
+    fireEvent.drop(slot, { dataTransfer });
+    expect(onPlace).toHaveBeenCalledWith(edgeKey(0, 0, 'h'), 'wire');
+  });
+
+  it('does not drop a dragged component onto an occupied slot', () => {
+    const grid = createEmptyGrid(2, 2);
+    grid.edges[edgeKey(0, 0, 'h')] = { type: 'battery' };
+    const onPlace = vi.fn();
+    render(
+      <CircuitGrid
+        grid={grid}
+        onPlace={onPlace}
+        onToggleSwitch={vi.fn()}
+        onRemove={vi.fn()}
+        fixedKeys={new Set([edgeKey(0, 0, 'h')])}
+        pendingComponent={null}
+      />,
+    );
+    const slot = screen.getByTestId(`slot-${edgeKey(0, 0, 'h')}`);
+    const dataTransfer = {
+      data: { 'application/x-component-type': 'wire' } as Record<string, string>,
+      setData() {},
+      getData(format: string) {
+        return this.data[format] ?? '';
+      },
+    };
+    fireEvent.drop(slot, { dataTransfer });
+    expect(onPlace).not.toHaveBeenCalled();
+  });
+
+  it('removes a placed wire on tap', async () => {
+    const user = userEvent.setup();
+    const onRemove = vi.fn();
+    const grid = createEmptyGrid(2, 2);
+    grid.edges[edgeKey(0, 0, 'h')] = { type: 'wire' };
+    render(
+      <CircuitGrid
+        grid={grid}
+        onPlace={vi.fn()}
+        onToggleSwitch={vi.fn()}
+        onRemove={onRemove}
+        fixedKeys={new Set()}
+        pendingComponent={null}
+      />,
+    );
+    await user.click(screen.getByTestId(`slot-${edgeKey(0, 0, 'h')}`));
+    expect(onRemove).toHaveBeenCalledWith(edgeKey(0, 0, 'h'));
+  });
+
+  it('does not remove a fixed component on tap', async () => {
+    const user = userEvent.setup();
+    const onRemove = vi.fn();
+    const grid = createEmptyGrid(2, 2);
+    grid.edges[edgeKey(0, 0, 'h')] = { type: 'battery' };
+    render(
+      <CircuitGrid
+        grid={grid}
+        onPlace={vi.fn()}
+        onToggleSwitch={vi.fn()}
+        onRemove={onRemove}
+        fixedKeys={new Set([edgeKey(0, 0, 'h')])}
+        pendingComponent={null}
+      />,
+    );
+    await user.click(screen.getByTestId(`slot-${edgeKey(0, 0, 'h')}`));
+    expect(onRemove).not.toHaveBeenCalled();
+  });
+
+  it('makes a placed non-fixed component draggable back out with its grid key', () => {
+    const grid = createEmptyGrid(2, 2);
+    grid.edges[edgeKey(0, 0, 'h')] = { type: 'switch', closed: false };
+    render(
+      <CircuitGrid
+        grid={grid}
+        onPlace={vi.fn()}
+        onToggleSwitch={vi.fn()}
+        onRemove={vi.fn()}
+        fixedKeys={new Set()}
+        pendingComponent={null}
+      />,
+    );
+    const slot = screen.getByTestId(`slot-${edgeKey(0, 0, 'h')}`);
+    expect(slot).toHaveAttribute('draggable', 'true');
+    const data: Record<string, string> = {};
+    const dataTransfer = {
+      setData: (format: string, value: string) => {
+        data[format] = value;
+      },
+      getData: (format: string) => data[format] ?? '',
+    };
+    fireEvent.dragStart(slot, { dataTransfer });
+    expect(data['application/x-grid-key']).toBe(edgeKey(0, 0, 'h'));
+  });
+
+  it('does not make a fixed component draggable', () => {
+    const grid = createEmptyGrid(2, 2);
+    grid.edges[edgeKey(0, 0, 'h')] = { type: 'battery' };
+    render(
+      <CircuitGrid
+        grid={grid}
+        onPlace={vi.fn()}
+        onToggleSwitch={vi.fn()}
+        onRemove={vi.fn()}
+        fixedKeys={new Set([edgeKey(0, 0, 'h')])}
+        pendingComponent={null}
+      />,
+    );
+    expect(screen.getByTestId(`slot-${edgeKey(0, 0, 'h')}`)).toHaveAttribute('draggable', 'false');
   });
 });

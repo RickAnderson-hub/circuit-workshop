@@ -28,19 +28,36 @@
   stroke-dasharray: 4 6;
 }
 
+.slot.drag-over {
+  stroke: #ffcc33;
+  stroke-dasharray: none;
+  stroke-width: 8;
+}
+
 .slot.occupied {
-  stroke: #4a4a4a;
+  stroke: #7a5a34;
+  stroke-linecap: round;
 }
 
 .slot.switch-open {
   stroke: #c0392b;
+  stroke-dasharray: 2 8;
 }
 
 .slot.switch-closed {
   stroke: #27ae60;
+  stroke-dasharray: 2 8;
 }
 
 .slot.live {
   stroke: #ffcc33;
   filter: drop-shadow(0 0 4px #ffcc33);
+}
+
+.component-icon {
+  pointer-events: none;
+}
+
+.component-icon.live {
+  filter: drop-shadow(0 0 5px #ffcc33);
 }

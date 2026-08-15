@@ -5,6 +5,7 @@ export interface ComponentTrayProps {
   items: ComponentType[];
   selected: ComponentType | null;
   onSelect: (type: ComponentType) => void;
+  onRemove?: (key: string) => void;
 }
 
 const LABELS: Record<ComponentType, string> = {
@@ -15,15 +16,35 @@ const LABELS: Record<ComponentType, string> = {
   battery: 'Battery',
 };
 
-export function ComponentTray({ items, selected, onSelect }: ComponentTrayProps) {
+const GRID_KEY_DRAG_TYPE = 'application/x-grid-key';
+
+export function ComponentTray({ items, selected, onSelect, onRemove }: ComponentTrayProps) {
   return (
-    <div className="component-tray">
+    <div
+      className="component-tray"
+      data-testid="component-tray"
+      onDragOver={(event) => {
+        if (!onRemove) return;
+        event.preventDefault();
+      }}
+      onDrop={(event) => {
+        if (!onRemove) return;
+        event.preventDefault();
+        const key = event.dataTransfer.getData(GRID_KEY_DRAG_TYPE);
+        if (key) onRemove(key);
+      }}
+    >
       {items.map((type, index) => (
         <button
           key={`${type}-${index}`}
           type="button"
+          draggable
           className={`tray-item${type === selected ? ' selected' : ''}`}
           onClick={() => onSelect(type)}
+          onDragStart={(event) => {
+            event.dataTransfer.setData('application/x-component-type', type);
+            event.dataTransfer.effectAllowed = 'copy';
+          }}
         >
           {LABELS[type]}
         </button>
