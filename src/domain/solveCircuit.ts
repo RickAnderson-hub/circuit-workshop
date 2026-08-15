@@ -5,6 +5,11 @@ function conducts(component: PlacedComponent): boolean {
   return true;
 }
 
+/** A diode with no explicit `forward` field conducts a→b (its default state). */
+function diodeConductsForward(component: PlacedComponent): boolean {
+  return component.forward !== false;
+}
+
 function buildAdjacency(grid: GridState): Map<string, string[]> {
   const adjacency = new Map<string, string[]>();
   const addEdge = (a: string, b: string) => {
@@ -17,8 +22,13 @@ function buildAdjacency(grid: GridState): Map<string, string[]> {
     const [a, b] = edgeJunctions(key);
     const aKey = junctionKey(a);
     const bKey = junctionKey(b);
-    addEdge(aKey, bKey);
-    addEdge(bKey, aKey);
+    if (component.type === 'diode') {
+      if (diodeConductsForward(component)) addEdge(aKey, bKey);
+      else addEdge(bKey, aKey);
+    } else {
+      addEdge(aKey, bKey);
+      addEdge(bKey, aKey);
+    }
   }
   return adjacency;
 }
@@ -80,28 +90,48 @@ export function solveCircuit(grid: GridState): Set<EdgeKey> {
     const [a, b] = edgeJunctions(key);
     const aKey = junctionKey(a);
     const bKey = junctionKey(b);
+    const excluded: [string, string] = [aKey, bKey];
 
-    const reachableFromA = reachableFrom(adjacency, batteryA, [aKey, bKey]);
-    const reachableFromB = reachableFrom(adjacency, batteryB, [aKey, bKey]);
+    const reachableFromA = reachableFrom(adjacency, batteryA, excluded);
+    const reachableFromB = reachableFrom(adjacency, batteryB, excluded);
 
-    const forward = reachableFromA.has(aKey) && reachableFromB.has(bKey);
-    const backward = reachableFromA.has(bKey) && reachableFromB.has(aKey);
-    if (forward || backward) live.add(key);
+    // Does current delivered by one battery terminal arrive at `from`, and
+    // — walking onward from `to` (not backtracking through this edge) —
+    // reach the *other* terminal? Walking onward from `to` rather than
+    // checking `to`'s membership in a battery-rooted set is what makes this
+    // correct for directional (diode) edges: a node downstream of a diode
+    // may be unreachable from either battery terminal by itself (nothing
+    // points back to it once this edge is excluded), even though current
+    // genuinely flows through it via this edge and onward.
+    function passesThrough(from: string, to: string): boolean {
+      const reachableFromTo = reachableFrom(adjacency, to, excluded);
+      const viaA = reachableFromA.has(from) && reachableFromTo.has(batteryB);
+      const viaB = reachableFromB.has(from) && reachableFromTo.has(batteryA);
+      return viaA || viaB;
+    }
+
+    const forward = passesThrough(aKey, bKey);
+    const backward = passesThrough(bKey, aKey);
+    // A diode only ever conducts one way, so only its own allowed direction
+    // counts — unlike other components, where current could be flowing
+    // through in either direction.
+    const isLive = component.type === 'diode' ? (diodeConductsForward(component) ? forward : backward) : forward || backward;
+    if (isLive) live.add(key);
   }
   return live;
 }
 
+const OUTPUT_TYPES = new Set<PlacedComponent['type']>(['led', 'bulb', 'buzzer', 'motor']);
+
 /**
- * A grid is solved once every bulb/LED currently on it is carrying
- * current — checking the live grid rather than just the level's fixed
- * components means a bulb/LED supplied via the tray is held to the same
- * standard as one built into the puzzle. An empty grid (no bulbs/LEDs
- * placed yet) is never solved.
+ * A grid is solved once every output (bulb/LED/buzzer/motor) currently on
+ * it is carrying current — checking the live grid rather than just the
+ * level's fixed components means an output supplied via the tray is held
+ * to the same standard as one built into the puzzle. An empty grid (no
+ * outputs placed yet) is never solved.
  */
 export function isSolved(grid: GridState): boolean {
   const live = solveCircuit(grid);
-  const targets = Object.entries(grid.edges).filter(
-    ([, component]) => component.type === 'led' || component.type === 'bulb',
-  );
+  const targets = Object.entries(grid.edges).filter(([, component]) => OUTPUT_TYPES.has(component.type));
   return targets.length > 0 && targets.every(([key]) => live.has(key));
 }

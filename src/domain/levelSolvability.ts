@@ -18,12 +18,16 @@ function allEdgeKeys(rows: number, cols: number): string[] {
  * nothing, or one of the types with remaining stock. A switch only needs
  * its closed state tried here — an open switch never conducts, so it
  * behaves exactly like an empty slot for reachability purposes and would
- * only bloat the search.
+ * only bloat the search. A diode has no such dominated state — it always
+ * conducts one way or the other — so both directions are tried.
  */
 function slotCandidates(remaining: Map<ComponentType, number>): (PlacedComponent | null)[] {
   const options: (PlacedComponent | null)[] = [null];
   for (const [type, count] of remaining) {
-    if (count > 0) options.push(type === 'switch' ? { type, closed: true } : { type });
+    if (count <= 0) continue;
+    if (type === 'switch') options.push({ type, closed: true });
+    else if (type === 'diode') options.push({ type, forward: true }, { type, forward: false });
+    else options.push({ type });
   }
   return options;
 }

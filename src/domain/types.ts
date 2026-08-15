@@ -1,9 +1,15 @@
-export type ComponentType = 'wire' | 'switch' | 'led' | 'bulb' | 'battery';
+export type ComponentType = 'wire' | 'switch' | 'led' | 'bulb' | 'battery' | 'diode' | 'buzzer' | 'motor';
 
 export interface PlacedComponent {
   type: ComponentType;
   /** Only meaningful for 'switch': true = closed (conducting). */
   closed?: boolean;
+  /**
+   * Only meaningful for 'diode': true = conducts from this edge's first
+   * junction to its second (the order edgeJunctions() returns), false =
+   * conducts the other way. A diode never conducts in both directions.
+   */
+  forward?: boolean;
 }
 
 export type EdgeOrientation = 'h' | 'v';

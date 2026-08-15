@@ -46,4 +46,27 @@ describe('isLevelSolvable', () => {
     };
     expect(isLevelSolvable(oneWireShort)).toBe(false);
   });
+
+  it('explores both diode directions, not just the default', () => {
+    // Only empty slot is (0,1,'v'); the only way around the loop traverses
+    // it from (1,1) to (0,1) — the *reverse* of a diode's default forward
+    // direction. Forcing exactly one slot and one tray item (no alternate
+    // placement the solver could pick instead) means this is only
+    // solvable if the search actually tries the reversed direction.
+    const needsReversedDiode: LevelDef = {
+      id: 'diode-reversed-test-fixture',
+      title: 'test',
+      goal: 'test',
+      rows: 2,
+      cols: 2,
+      fixed: {
+        [edgeKey(0, 0, 'h')]: { type: 'battery' },
+        [edgeKey(0, 0, 'v')]: { type: 'wire' },
+        [edgeKey(1, 0, 'h')]: { type: 'bulb' },
+      },
+      tray: ['diode'],
+      rewardPart: 'nose',
+    };
+    expect(isLevelSolvable(needsReversedDiode)).toBe(true);
+  });
 });

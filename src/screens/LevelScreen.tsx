@@ -88,6 +88,17 @@ export function LevelScreen({ level, onComplete, onBack, onNext }: LevelScreenPr
     });
   }
 
+  function handleToggleDiode(key: string) {
+    setGrid((previous) => {
+      const component = previous.edges[key];
+      if (!component || component.type !== 'diode') return previous;
+      return {
+        ...previous,
+        edges: { ...previous.edges, [key]: { type: 'diode' as const, forward: component.forward === false } },
+      };
+    });
+  }
+
   return (
     <div className="level-screen">
       <div className="level-screen-header">
@@ -126,6 +137,7 @@ export function LevelScreen({ level, onComplete, onBack, onNext }: LevelScreenPr
         grid={grid}
         onPlace={handlePlace}
         onToggleSwitch={handleToggleSwitch}
+        onToggleDiode={handleToggleDiode}
         onRemove={handleRemove}
         fixedKeys={fixedKeys}
         pendingComponent={selected}

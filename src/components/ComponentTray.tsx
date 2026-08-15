@@ -15,6 +15,9 @@ const LABELS: Record<ComponentType, string> = {
   led: 'LED',
   bulb: 'Bulb',
   battery: 'Battery',
+  diode: 'Diode',
+  buzzer: 'Buzzer',
+  motor: 'Motor',
 };
 
 const GRID_KEY_DRAG_TYPE = 'application/x-grid-key';

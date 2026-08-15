@@ -61,3 +61,15 @@
 .component-icon.live {
   filter: drop-shadow(0 0 5px #ffcc33);
 }
+
+.motor-icon.live .motor-blades {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: motor-spin 0.6s linear infinite;
+}
+
+@keyframes motor-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

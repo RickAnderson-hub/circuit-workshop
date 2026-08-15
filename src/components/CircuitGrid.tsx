@@ -7,6 +7,7 @@ export interface CircuitGridProps {
   grid: GridState;
   onPlace: (key: string, type: ComponentType) => void;
   onToggleSwitch: (key: string) => void;
+  onToggleDiode: (key: string) => void;
   onRemove: (key: string) => void;
   fixedKeys: Set<string>;
   pendingComponent: ComponentType | null;
@@ -109,7 +110,56 @@ function SwitchIcon({
   );
 }
 
-export function CircuitGrid({ grid, onPlace, onToggleSwitch, onRemove, fixedKeys, pendingComponent }: CircuitGridProps) {
+function DiodeIcon({ testId, forward }: { testId: string; forward: boolean }) {
+  return (
+    <g data-testid={testId} className="component-icon diode-icon" transform={forward ? undefined : 'rotate(180)'}>
+      <path d="M -8 -8 L -8 8 L 8 0 Z" fill="#c9d6e3" stroke="#1a1a1a" strokeWidth={2.5} strokeLinejoin="round" />
+      <line x1={8} y1={-9} x2={8} y2={9} stroke="#1a1a1a" strokeWidth={2.5} />
+    </g>
+  );
+}
+
+function BuzzerIcon({ testId, live }: { testId: string; live: boolean }) {
+  return (
+    <g data-testid={testId} className={`component-icon buzzer-icon${live ? ' live' : ''}`}>
+      <path
+        d="M -10 -6 L -3 -6 L 6 -13 L 6 13 L -3 6 L -10 6 Z"
+        fill={live ? '#ffcc33' : '#f4e3c1'}
+        stroke="#1a1a1a"
+        strokeWidth={2.5}
+        strokeLinejoin="round"
+      />
+      {live && (
+        <g stroke="#ffcc33" strokeWidth={2} strokeLinecap="round" fill="none">
+          <path d="M 11 -6 Q 15 0 11 6" />
+          <path d="M 15 -10 Q 21 0 15 10" />
+        </g>
+      )}
+    </g>
+  );
+}
+
+function MotorIcon({ testId, live }: { testId: string; live: boolean }) {
+  return (
+    <g data-testid={testId} className={`component-icon motor-icon${live ? ' live' : ''}`}>
+      <circle cx={0} cy={0} r={12} fill={live ? '#8fbf8f' : '#f4e3c1'} stroke="#1a1a1a" strokeWidth={2.5} />
+      <g className="motor-blades" stroke="#1a1a1a" strokeWidth={2} strokeLinecap="round">
+        <line x1={0} y1={-8} x2={0} y2={8} />
+        <line x1={-8} y1={0} x2={8} y2={0} />
+      </g>
+    </g>
+  );
+}
+
+export function CircuitGrid({
+  grid,
+  onPlace,
+  onToggleSwitch,
+  onToggleDiode,
+  onRemove,
+  fixedKeys,
+  pendingComponent,
+}: CircuitGridProps) {
   const live = solveCircuit(grid);
   const width = (grid.cols - 1) * CELL_SIZE + PADDING * 2;
   const height = (grid.rows - 1) * CELL_SIZE + PADDING * 2;
@@ -134,6 +184,7 @@ export function CircuitGrid({ grid, onPlace, onToggleSwitch, onRemove, fixedKeys
     if (component) {
       if (fixedKeys.has(key)) return;
       if (component.type === 'switch') onToggleSwitch(key);
+      else if (component.type === 'diode') onToggleDiode(key);
       else onRemove(key);
       return;
     }
@@ -147,9 +198,10 @@ export function CircuitGrid({ grid, onPlace, onToggleSwitch, onRemove, fixedKeys
     }
   }
 
-  function handleSwitchPointerDown(key: string) {
+  function handleTogglePointerDown(key: string) {
     const component = grid.edges[key];
-    if (component?.type !== 'switch' || fixedKeys.has(key)) return;
+    const isToggleable = component?.type === 'switch' || component?.type === 'diode';
+    if (!isToggleable || fixedKeys.has(key)) return;
     longPressFired.current = false;
     longPressTimer.current = setTimeout(() => {
       longPressFired.current = true;
@@ -222,7 +274,7 @@ export function CircuitGrid({ grid, onPlace, onToggleSwitch, onRemove, fixedKeys
                 strokeWidth={28}
                 strokeLinecap="round"
                 onClick={() => handleSlotClick(key)}
-                onPointerDown={() => handleSwitchPointerDown(key)}
+                onPointerDown={() => handleTogglePointerDown(key)}
                 onPointerUp={clearLongPressTimer}
                 onPointerLeave={clearLongPressTimer}
                 onPointerCancel={clearLongPressTimer}
@@ -250,6 +302,21 @@ export function CircuitGrid({ grid, onPlace, onToggleSwitch, onRemove, fixedKeys
               )}
               {component?.type === 'switch' && (
                 <SwitchIcon testId={`icon-switch-${key}`} x1={x1} y1={y1} x2={x2} y2={y2} closed={!!component.closed} />
+              )}
+              {component?.type === 'diode' && (
+                <g transform={`translate(${midX} ${midY}) rotate(${orientation === 'v' ? 90 : 0})`}>
+                  <DiodeIcon testId={`icon-diode-${key}`} forward={component.forward !== false} />
+                </g>
+              )}
+              {component?.type === 'buzzer' && (
+                <g transform={`translate(${midX} ${midY})`}>
+                  <BuzzerIcon testId={`icon-buzzer-${key}`} live={isLive} />
+                </g>
+              )}
+              {component?.type === 'motor' && (
+                <g transform={`translate(${midX} ${midY})`}>
+                  <MotorIcon testId={`icon-motor-${key}`} live={isLive} />
+                </g>
               )}
             </g>
           );

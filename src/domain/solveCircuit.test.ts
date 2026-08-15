@@ -62,6 +62,41 @@ describe('solveCircuit', () => {
     expect(live.has(edgeKey(1, 0, 'h'))).toBe(true);
   });
 
+  it('lights a loop through a forward-facing diode, but blocks it when the diode is reversed', () => {
+    // Same loop shape as the "simple closed loop" test above, but the bottom
+    // wire is a diode. edgeJunctions(edgeKey(1, 0, 'h')) is [(1,0), (1,1)],
+    // and the only path around the loop (other than through the battery
+    // itself) traverses this edge from (1,0) to (1,1) — i.e. "forward".
+    const forwardGrid = withComponents(createEmptyGrid(2, 2), [
+      [edgeKey(0, 0, 'h'), { type: 'battery' }],
+      [edgeKey(0, 0, 'v'), { type: 'wire' }],
+      [edgeKey(0, 1, 'v'), { type: 'wire' }],
+      [edgeKey(1, 0, 'h'), { type: 'diode', forward: true }],
+    ]);
+    expect(solveCircuit(forwardGrid)).toEqual(new Set([
+      edgeKey(0, 0, 'h'),
+      edgeKey(0, 0, 'v'),
+      edgeKey(0, 1, 'v'),
+      edgeKey(1, 0, 'h'),
+    ]));
+
+    const reversedGrid: GridState = {
+      ...forwardGrid,
+      edges: { ...forwardGrid.edges, [edgeKey(1, 0, 'h')]: { type: 'diode', forward: false } },
+    };
+    expect(solveCircuit(reversedGrid)).toEqual(new Set());
+  });
+
+  it('treats a diode with no explicit forward field as forward-facing by default', () => {
+    const grid = withComponents(createEmptyGrid(2, 2), [
+      [edgeKey(0, 0, 'h'), { type: 'battery' }],
+      [edgeKey(0, 0, 'v'), { type: 'wire' }],
+      [edgeKey(0, 1, 'v'), { type: 'wire' }],
+      [edgeKey(1, 0, 'h'), { type: 'diode' }],
+    ]);
+    expect(solveCircuit(grid).has(edgeKey(1, 0, 'h'))).toBe(true);
+  });
+
   it('lights a switch branch once closed, and stops lighting it once reopened', () => {
     const closedGrid = withComponents(createEmptyGrid(2, 2), [
       [edgeKey(0, 0, 'h'), { type: 'battery' }],
@@ -77,6 +112,20 @@ describe('solveCircuit', () => {
     };
     expect(solveCircuit(openGrid)).toEqual(new Set());
   });
+
+  it('does not light a dangling wire stub that dead-ends off a live loop', () => {
+    const grid = withComponents(createEmptyGrid(3, 2), [
+      [edgeKey(0, 0, 'h'), { type: 'battery' }],
+      [edgeKey(0, 0, 'v'), { type: 'wire' }],
+      [edgeKey(1, 0, 'h'), { type: 'wire' }],
+      [edgeKey(0, 1, 'v'), { type: 'wire' }],
+      // Dangles off junction (1,0), which is on the loop, but (2,0) connects to nothing else.
+      [edgeKey(1, 0, 'v'), { type: 'wire' }],
+    ]);
+    const live = solveCircuit(grid);
+    expect(live.has(edgeKey(1, 0, 'v'))).toBe(false);
+    expect(live.has(edgeKey(0, 0, 'v'))).toBe(true);
+  });
 });
 
 describe('isSolved', () => {
@@ -91,6 +140,16 @@ describe('isSolved', () => {
       [edgeKey(0, 0, 'v'), { type: 'wire' }],
       [edgeKey(0, 1, 'v'), { type: 'bulb' }],
       [edgeKey(1, 0, 'h'), { type: 'wire' }],
+    ]);
+    expect(isSolved(grid)).toBe(true);
+  });
+
+  it('requires a buzzer and a motor to be live too, not just bulbs/LEDs', () => {
+    const grid = withComponents(createEmptyGrid(2, 2), [
+      [edgeKey(0, 0, 'h'), { type: 'battery' }],
+      [edgeKey(0, 0, 'v'), { type: 'wire' }],
+      [edgeKey(0, 1, 'v'), { type: 'buzzer' }],
+      [edgeKey(1, 0, 'h'), { type: 'motor' }],
     ]);
     expect(isSolved(grid)).toBe(true);
   });
