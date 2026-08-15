@@ -18,7 +18,7 @@ describe('CircuitGrid', () => {
         pendingComponent="wire"
       />,
     );
-    await user.click(screen.getByTestId(`slot-${edgeKey(0, 0, 'h')}`));
+    await user.click(screen.getByTestId(`hit-${edgeKey(0, 0, 'h')}`));
     expect(onPlace).toHaveBeenCalledWith(edgeKey(0, 0, 'h'), 'wire');
   });
 
@@ -37,7 +37,7 @@ describe('CircuitGrid', () => {
         pendingComponent="wire"
       />,
     );
-    await user.click(screen.getByTestId(`slot-${edgeKey(0, 0, 'h')}`));
+    await user.click(screen.getByTestId(`hit-${edgeKey(0, 0, 'h')}`));
     expect(onPlace).not.toHaveBeenCalled();
   });
 
@@ -56,7 +56,7 @@ describe('CircuitGrid', () => {
         pendingComponent={null}
       />,
     );
-    await user.click(screen.getByTestId(`slot-${edgeKey(0, 0, 'h')}`));
+    await user.click(screen.getByTestId(`hit-${edgeKey(0, 0, 'h')}`));
     expect(onToggleSwitch).toHaveBeenCalledWith(edgeKey(0, 0, 'h'));
   });
 
@@ -114,7 +114,7 @@ describe('CircuitGrid', () => {
         pendingComponent={null}
       />,
     );
-    const slot = screen.getByTestId(`slot-${edgeKey(0, 0, 'h')}`);
+    const slot = screen.getByTestId(`hit-${edgeKey(0, 0, 'h')}`);
     const dataTransfer = {
       data: { 'application/x-component-type': 'wire' } as Record<string, string>,
       setData() {},
@@ -141,7 +141,7 @@ describe('CircuitGrid', () => {
         pendingComponent={null}
       />,
     );
-    const slot = screen.getByTestId(`slot-${edgeKey(0, 0, 'h')}`);
+    const slot = screen.getByTestId(`hit-${edgeKey(0, 0, 'h')}`);
     const dataTransfer = {
       data: { 'application/x-component-type': 'wire' } as Record<string, string>,
       setData() {},
@@ -168,7 +168,7 @@ describe('CircuitGrid', () => {
         pendingComponent={null}
       />,
     );
-    await user.click(screen.getByTestId(`slot-${edgeKey(0, 0, 'h')}`));
+    await user.click(screen.getByTestId(`hit-${edgeKey(0, 0, 'h')}`));
     expect(onRemove).toHaveBeenCalledWith(edgeKey(0, 0, 'h'));
   });
 
@@ -187,7 +187,7 @@ describe('CircuitGrid', () => {
         pendingComponent={null}
       />,
     );
-    await user.click(screen.getByTestId(`slot-${edgeKey(0, 0, 'h')}`));
+    await user.click(screen.getByTestId(`hit-${edgeKey(0, 0, 'h')}`));
     expect(onRemove).not.toHaveBeenCalled();
   });
 
@@ -204,7 +204,7 @@ describe('CircuitGrid', () => {
         pendingComponent={null}
       />,
     );
-    const slot = screen.getByTestId(`slot-${edgeKey(0, 0, 'h')}`);
+    const slot = screen.getByTestId(`hit-${edgeKey(0, 0, 'h')}`);
     expect(slot).toHaveAttribute('draggable', 'true');
     const data: Record<string, string> = {};
     const dataTransfer = {
@@ -230,6 +230,6 @@ describe('CircuitGrid', () => {
         pendingComponent={null}
       />,
     );
-    expect(screen.getByTestId(`slot-${edgeKey(0, 0, 'h')}`)).toHaveAttribute('draggable', 'false');
+    expect(screen.getByTestId(`hit-${edgeKey(0, 0, 'h')}`)).toHaveAttribute('draggable', 'false');
   });
 });

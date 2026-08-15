@@ -186,11 +186,10 @@ export function CircuitGrid({ grid, onPlace, onToggleSwitch, onRemove, fixedKeys
           return (
             <g key={key}>
               {/* Visible line with styling */}
-              <line className={classes.join(' ')} x1={x1} y1={y1} x2={x2} y2={y2} />
+              <line data-testid={`slot-${key}`} className={classes.join(' ')} x1={x1} y1={y1} x2={x2} y2={y2} />
               {/* Invisible hit-target line for mobile tap reliability (28px wide) and drag/drop target */}
               <line
-                data-testid={`slot-${key}`}
-                className={isLive ? 'live' : ''}
+                data-testid={`hit-${key}`}
                 x1={x1}
                 y1={y1}
                 x2={x2}

@@ -31,9 +31,9 @@ describe('App', () => {
     // (0,1,'v'); the tray has two wires to complete the loop via
     // (0,0,'v') and (1,0,'h').
     await user.click(screen.getAllByRole('button', { name: /wire/i })[0]);
-    await user.click(screen.getByTestId('slot-0,0,v'));
+    await user.click(screen.getByTestId('hit-0,0,v'));
     await user.click(screen.getAllByRole('button', { name: /wire/i })[0]);
-    await user.click(screen.getByTestId('slot-1,0,h'));
+    await user.click(screen.getByTestId('hit-1,0,h'));
 
     await user.click(screen.getByRole('button', { name: /back/i }));
     expect(screen.getByText('The Robot Workshop')).toBeInTheDocument();
