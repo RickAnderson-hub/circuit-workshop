@@ -19,8 +19,20 @@ export function RobotSidekick({ earnedParts, celebrating }: RobotSidekickProps) 
       role="img"
       aria-label="Robot sidekick"
     >
-      <rect x="30" y="60" width="100" height="90" rx="18" fill="#c9d6e3" stroke="#1a1a1a" strokeWidth="4" />
-      <rect x="45" y="10" width="70" height="55" rx="16" fill="#e3ecf5" stroke="#1a1a1a" strokeWidth="4" />
+      <path
+        d="M 122.2 78.4 L 116.0 72.6 L 81.2 76.4 L 62.2 76.2 L 48.7 73.6 L 35.6 75.1 L 34.1 88.2 L 40.4 138.2 L 40.6 136.6 L 43.9 136.7 L 44.8 145.8 L 55.7 149.9 L 102.3 149.9 L 115.2 147.0 L 119.4 135.6 L 125.2 99.3 L 125.9 87.2 Z"
+        fill="#c9d6e3"
+        stroke="#1a1a1a"
+        strokeWidth="4"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M 112.9 17.7 L 110.0 17.7 L 109.9 14.3 L 107.5 12.3 L 100.2 10.3 L 59.6 11.0 L 44.7 13.3 L 42.2 21.2 L 41.6 44.3 L 42.5 58.9 L 44.8 66.1 L 49.1 70.0 L 52.1 70.0 L 52.6 71.8 L 62.4 73.0 L 90.1 72.7 L 114.0 69.7 L 116.5 55.5 L 116.8 25.0 Z"
+        fill="#e3ecf5"
+        stroke="#1a1a1a"
+        strokeWidth="4"
+        strokeLinejoin="round"
+      />
 
       <g data-testid="part-antenna" className={`robot-part${isEarned('antenna') ? ' earned' : ''}`}>
         <line x1="80" y1="10" x2="80" y2="-10" stroke="#1a1a1a" strokeWidth="4" />
