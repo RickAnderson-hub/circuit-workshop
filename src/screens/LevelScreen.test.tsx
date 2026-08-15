@@ -46,6 +46,21 @@ describe('LevelScreen', () => {
     expect(onComplete).toHaveBeenCalledTimes(1);
   });
 
+  it('disables a tray item once its budget is used up, and restores it when a placed piece is removed', async () => {
+    const user = userEvent.setup();
+    render(<LevelScreen level={LEVELS[0]} onComplete={vi.fn()} onBack={vi.fn()} />);
+
+    await user.click(screen.getByRole('button', { name: /wire/i }));
+    await user.click(screen.getByTestId('hit-0,0,v'));
+    await user.click(screen.getByRole('button', { name: /wire/i }));
+    await user.click(screen.getByTestId('hit-1,0,h'));
+
+    expect(screen.getByRole('button', { name: /wire/i })).toBeDisabled();
+
+    await user.click(screen.getByTestId('hit-0,0,v'));
+    expect(screen.getByRole('button', { name: /wire/i })).not.toBeDisabled();
+  });
+
   it('calls onBack when the back button is tapped', async () => {
     const user = userEvent.setup();
     const onBack = vi.fn();

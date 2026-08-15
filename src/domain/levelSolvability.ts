@@ -14,26 +14,30 @@ function allEdgeKeys(rows: number, cols: number): string[] {
 }
 
 /**
- * Candidate contents for one empty slot: nothing, or one of the tray's
- * component types. A switch only needs its closed state tried here — an
- * open switch never conducts, so it behaves exactly like an empty slot for
- * reachability purposes and would only bloat the search.
+ * Candidate contents for one empty slot, given what's still in the budget:
+ * nothing, or one of the types with remaining stock. A switch only needs
+ * its closed state tried here — an open switch never conducts, so it
+ * behaves exactly like an empty slot for reachability purposes and would
+ * only bloat the search.
  */
-function slotCandidates(types: ComponentType[]): (PlacedComponent | null)[] {
-  return [null, ...types.map((type): PlacedComponent => (type === 'switch' ? { type, closed: true } : { type }))];
+function slotCandidates(remaining: Map<ComponentType, number>): (PlacedComponent | null)[] {
+  const options: (PlacedComponent | null)[] = [null];
+  for (const [type, count] of remaining) {
+    if (count > 0) options.push(type === 'switch' ? { type, closed: true } : { type });
+  }
+  return options;
 }
 
 /**
  * Brute-forces whether some placement of the level's tray components onto
- * its empty slots solves the level. The tray is treated as an unlimited
- * supply of its listed types (matching in-game behavior: placing a
- * component doesn't consume it from the tray), so only the distinct types
- * available matter, not how many of each the tray lists.
+ * its empty slots solves the level. The tray is a finite budget — each
+ * type can only be placed as many times as it appears in `level.tray` —
+ * matching in-game behavior where placing a component consumes it.
  */
 export function isLevelSolvable(level: LevelDef): boolean {
   const emptyKeys = allEdgeKeys(level.rows, level.cols).filter((key) => !(key in level.fixed));
-  const types = Array.from(new Set(level.tray));
-  const candidates = slotCandidates(types);
+  const remaining = new Map<ComponentType, number>();
+  for (const type of level.tray) remaining.set(type, (remaining.get(type) ?? 0) + 1);
 
   const edges: GridState['edges'] = { ...level.fixed };
 
@@ -42,10 +46,16 @@ export function isLevelSolvable(level: LevelDef): boolean {
       return isSolved({ rows: level.rows, cols: level.cols, edges });
     }
     const key = emptyKeys[index];
-    for (const candidate of candidates) {
-      if (candidate) edges[key] = candidate;
-      else delete edges[key];
-      if (search(index + 1)) return true;
+    for (const candidate of slotCandidates(remaining)) {
+      if (candidate) {
+        edges[key] = candidate;
+        remaining.set(candidate.type, remaining.get(candidate.type)! - 1);
+      } else {
+        delete edges[key];
+      }
+      const solved = search(index + 1);
+      if (candidate) remaining.set(candidate.type, remaining.get(candidate.type)! + 1);
+      if (solved) return true;
     }
     delete edges[key];
     return false;

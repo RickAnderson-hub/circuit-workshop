@@ -3,6 +3,7 @@ import './ComponentTray.css';
 
 export interface ComponentTrayProps {
   items: ComponentType[];
+  remaining: Partial<Record<ComponentType, number>>;
   selected: ComponentType | null;
   onSelect: (type: ComponentType) => void;
   onRemove?: (key: string) => void;
@@ -18,7 +19,9 @@ const LABELS: Record<ComponentType, string> = {
 
 const GRID_KEY_DRAG_TYPE = 'application/x-grid-key';
 
-export function ComponentTray({ items, selected, onSelect, onRemove }: ComponentTrayProps) {
+export function ComponentTray({ items, remaining, selected, onSelect, onRemove }: ComponentTrayProps) {
+  const types = Array.from(new Set(items));
+
   return (
     <div
       className="component-tray"
@@ -34,21 +37,26 @@ export function ComponentTray({ items, selected, onSelect, onRemove }: Component
         if (key) onRemove(key);
       }}
     >
-      {items.map((type, index) => (
-        <button
-          key={index}
-          type="button"
-          draggable
-          className={`tray-item${type === selected ? ' selected' : ''}`}
-          onClick={() => onSelect(type)}
-          onDragStart={(event) => {
-            event.dataTransfer.setData('application/x-component-type', type);
-            event.dataTransfer.effectAllowed = 'copy';
-          }}
-        >
-          {LABELS[type]}
-        </button>
-      ))}
+      {types.map((type) => {
+        const count = remaining[type] ?? 0;
+        const exhausted = count <= 0;
+        return (
+          <button
+            key={type}
+            type="button"
+            draggable={!exhausted}
+            disabled={exhausted}
+            className={`tray-item${type === selected ? ' selected' : ''}`}
+            onClick={() => onSelect(type)}
+            onDragStart={(event) => {
+              event.dataTransfer.setData('application/x-component-type', type);
+              event.dataTransfer.effectAllowed = 'copy';
+            }}
+          >
+            {LABELS[type]} ×{count}
+          </button>
+        );
+      })}
     </div>
   );
 }

@@ -4,7 +4,7 @@ Backlog of things worth doing next, gathered from the build and review process. 
 
 ## Gameplay / product decisions (need Rick's call, not just engineering)
 
-- **Tray inventory is unlimited.** Components in the tray aren't consumed when placed, and there's no undo/reset button — a kid can spam every slot to brute-force a level, which blunts the puzzle. Options: give each level a fixed budget of pieces, or add a "clear board" button, or leave as-is (forgiving is arguably good for a 9-year-old's first exposure).
+- ~~Tray inventory is unlimited.~~ Done: each level's tray is now a finite, per-type budget (`Wire ×2`, etc.) computed from how many of that type appear in `level.tray` minus how many are currently placed on non-fixed grid edges. A type's tray button disables once its count hits zero and re-enables when a placed piece of that type is removed. No level data changed — every shipped level's tray already listed exactly the pieces needed. There's still no separate "clear board" button; per-piece removal (click or drag-back-to-tray) is the only undo, which was judged sufficient.
 - **Only 5 levels.** Covers open/closed → switches → series → parallel → mixed. More levels (e.g. combining 3+ components, multiple switches gating one bulb, or an early intro to resistors/brightness) are a natural next chunk of content.
 - **Sound effects.** No audio at all right now — a click/buzz on placement and a chime on solve would add a lot for a kid at low implementation cost.
 
@@ -15,7 +15,7 @@ Backlog of things worth doing next, gathered from the build and review process. 
 ## Testing gaps (correctness is fine; coverage has holes)
 
 - ~~The `live` (glowing) CSS state isn't directly asserted by any test.~~ Done: `data-testid="slot-*"` now lives on the visible line (the one that actually carries `classes.join(' ')`, including `live`); the invisible tap-target line got its own `data-testid="hit-*"`, and all CircuitGrid/LevelScreen/App tests were retargeted accordingly. Verified the fix has teeth by temporarily breaking the `live`-class computation and confirming the live-class test fails.
-- ~~No automated solvability check for level data.~~ Done: `src/domain/levelSolvability.ts` brute-forces tray-component placements (treating the tray as an unlimited supply of its distinct types, matching in-game behavior) and `src/domain/levelSolvability.test.ts` asserts every shipped level has at least one winning arrangement.
+- ~~No automated solvability check for level data.~~ Done: `src/domain/levelSolvability.ts` brute-forces tray-component placements — respecting each type's finite budget, matching in-game behavior — and `src/domain/levelSolvability.test.ts` asserts every shipped level has at least one winning arrangement.
 - ~~RobotSidekick's test only exercises 1 of 5 reward parts~~ Done: a parameterized test asserts each part is earned only when present in `earnedParts` (with the rest staying dim), plus a case for all five earned at once.
 - **SVG `<line>` elements have a zero-area bounding box**, which blocks Playwright and similar browser-automation tools from clicking them even though real touch/mouse clicks work fine (confirmed manually). If an automated end-to-end test suite is ever added, swap in a `<rect>` (or similar) hit-area element so it's automation-friendly too.
 

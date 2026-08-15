@@ -22,6 +22,25 @@ export function LevelScreen({ level, onComplete, onBack }: LevelScreenProps) {
   const completedRef = useRef(false);
   const fixedKeys = useMemo(() => new Set(Object.keys(level.fixed)), [level]);
 
+  const totalCounts = useMemo(() => {
+    const counts: Partial<Record<ComponentType, number>> = {};
+    for (const type of level.tray) counts[type] = (counts[type] ?? 0) + 1;
+    return counts;
+  }, [level]);
+
+  const remaining = useMemo(() => {
+    const placedCounts: Partial<Record<ComponentType, number>> = {};
+    for (const [key, component] of Object.entries(grid.edges)) {
+      if (fixedKeys.has(key)) continue;
+      placedCounts[component.type] = (placedCounts[component.type] ?? 0) + 1;
+    }
+    const result: Partial<Record<ComponentType, number>> = {};
+    for (const type of Object.keys(totalCounts) as ComponentType[]) {
+      result[type] = (totalCounts[type] ?? 0) - (placedCounts[type] ?? 0);
+    }
+    return result;
+  }, [grid, fixedKeys, totalCounts]);
+
   useEffect(() => {
     if (!completedRef.current && isSolved(grid)) {
       completedRef.current = true;
@@ -30,6 +49,7 @@ export function LevelScreen({ level, onComplete, onBack }: LevelScreenProps) {
   }, [grid, level, onComplete]);
 
   function handlePlace(key: string, type: ComponentType) {
+    if ((remaining[type] ?? 0) <= 0) return;
     setGrid((previous) => ({ ...previous, edges: { ...previous.edges, [key]: { type } } }));
     setSelected(null);
   }
@@ -69,7 +89,13 @@ export function LevelScreen({ level, onComplete, onBack }: LevelScreenProps) {
         fixedKeys={fixedKeys}
         pendingComponent={selected}
       />
-      <ComponentTray items={level.tray} selected={selected} onSelect={setSelected} onRemove={handleRemove} />
+      <ComponentTray
+        items={level.tray}
+        remaining={remaining}
+        selected={selected}
+        onSelect={setSelected}
+        onRemove={handleRemove}
+      />
     </div>
   );
 }

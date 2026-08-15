@@ -26,4 +26,24 @@ describe('isLevelSolvable', () => {
     };
     expect(isLevelSolvable(unsolvable)).toBe(false);
   });
+
+  it('respects the tray as a finite budget, not an unlimited supply of each type', () => {
+    // Needs two wires to close the loop via (0,0,'v') and (1,0,'h'), but the
+    // tray only provides one — should be unsolvable now that placing a
+    // component consumes it from the tray.
+    const oneWireShort = {
+      id: 'one-wire-short-test-fixture',
+      title: 'test',
+      goal: 'test',
+      rows: 2,
+      cols: 2,
+      fixed: {
+        [edgeKey(0, 0, 'h')]: { type: 'battery' as const },
+        [edgeKey(0, 1, 'v')]: { type: 'bulb' as const },
+      },
+      tray: ['wire'] as const,
+      rewardPart: 'nose' as const,
+    };
+    expect(isLevelSolvable(oneWireShort)).toBe(false);
+  });
 });
