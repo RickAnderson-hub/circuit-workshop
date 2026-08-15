@@ -16,7 +16,7 @@ Backlog of things worth doing next, gathered from the build and review process. 
 
 - ~~The `live` (glowing) CSS state isn't directly asserted by any test.~~ Done: `data-testid="slot-*"` now lives on the visible line (the one that actually carries `classes.join(' ')`, including `live`); the invisible tap-target line got its own `data-testid="hit-*"`, and all CircuitGrid/LevelScreen/App tests were retargeted accordingly. Verified the fix has teeth by temporarily breaking the `live`-class computation and confirming the live-class test fails.
 - ~~No automated solvability check for level data.~~ Done: `src/domain/levelSolvability.ts` brute-forces tray-component placements (treating the tray as an unlimited supply of its distinct types, matching in-game behavior) and `src/domain/levelSolvability.test.ts` asserts every shipped level has at least one winning arrangement.
-- **RobotSidekick's test only exercises 1 of 5 reward parts** (earned vs. dim), not the full part matrix.
+- ~~RobotSidekick's test only exercises 1 of 5 reward parts~~ Done: a parameterized test asserts each part is earned only when present in `earnedParts` (with the rest staying dim), plus a case for all five earned at once.
 - **SVG `<line>` elements have a zero-area bounding box**, which blocks Playwright and similar browser-automation tools from clicking them even though real touch/mouse clicks work fine (confirmed manually). If an automated end-to-end test suite is ever added, swap in a `<rect>` (or similar) hit-area element so it's automation-friendly too.
 
 ## Small engineering cleanups (low risk, low priority)
