@@ -1,8 +1,12 @@
-export type ComponentType = 'wire' | 'switch' | 'led' | 'bulb' | 'battery' | 'diode' | 'buzzer' | 'motor';
+export type ComponentType = 'wire' | 'switch' | 'led' | 'bulb' | 'battery' | 'diode' | 'buzzer' | 'motor' | 'inverter';
 
 export interface PlacedComponent {
   type: ComponentType;
-  /** Only meaningful for 'switch': true = closed (conducting). */
+  /**
+   * Only meaningful for 'switch' and 'inverter': true = closed. A switch
+   * conducts when closed (like a normal switch); an inverter conducts
+   * when NOT closed — it's a backwards switch, i.e. a NOT gate.
+   */
   closed?: boolean;
   /**
    * Only meaningful for 'diode': true = conducts from this edge's first

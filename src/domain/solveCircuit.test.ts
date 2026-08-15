@@ -113,6 +113,22 @@ describe('solveCircuit', () => {
     expect(solveCircuit(openGrid)).toEqual(new Set());
   });
 
+  it('lights an inverter branch by default, and stops lighting it once closed (it is a backwards switch)', () => {
+    const defaultGrid = withComponents(createEmptyGrid(2, 2), [
+      [edgeKey(0, 0, 'h'), { type: 'battery' }],
+      [edgeKey(0, 0, 'v'), { type: 'inverter' }],
+      [edgeKey(0, 1, 'v'), { type: 'wire' }],
+      [edgeKey(1, 0, 'h'), { type: 'wire' }],
+    ]);
+    expect(solveCircuit(defaultGrid).has(edgeKey(0, 0, 'v'))).toBe(true);
+
+    const closedGrid: GridState = {
+      ...defaultGrid,
+      edges: { ...defaultGrid.edges, [edgeKey(0, 0, 'v')]: { type: 'inverter', closed: true } },
+    };
+    expect(solveCircuit(closedGrid)).toEqual(new Set());
+  });
+
   it('does not light a dangling wire stub that dead-ends off a live loop', () => {
     const grid = withComponents(createEmptyGrid(3, 2), [
       [edgeKey(0, 0, 'h'), { type: 'battery' }],

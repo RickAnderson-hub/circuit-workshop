@@ -22,13 +22,18 @@ function allEdgeKeys(rows: number, cols: number): string[] {
  * conducts one way or the other — so both directions are tried.
  */
 function slotCandidates(remaining: Map<ComponentType, number>): (PlacedComponent | null)[] {
-  const options: (PlacedComponent | null)[] = [null];
+  const options: (PlacedComponent | null)[] = [];
   for (const [type, count] of remaining) {
     if (count <= 0) continue;
     if (type === 'switch') options.push({ type, closed: true });
     else if (type === 'diode') options.push({ type, forward: true }, { type, forward: false });
     else options.push({ type });
   }
+  // Try placements before leaving the slot empty: intended solutions
+  // typically use most of the tray, so this finds a valid arrangement
+  // (search short-circuits on first success) far faster than exploring
+  // the mostly-empty branches first would.
+  options.push(null);
   return options;
 }
 

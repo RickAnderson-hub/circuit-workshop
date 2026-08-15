@@ -89,6 +89,20 @@ describe('LevelScreen', () => {
     expect(screen.queryByTestId('robot-sidekick')).not.toBeInTheDocument();
   });
 
+  it('shows the badge collection, not a robot, in the completion banner for a stage 3 level', async () => {
+    const user = userEvent.setup();
+    const stage3Level = LEVELS.find((level) => level.id === 'inverter-intro')!;
+    renderLevelScreen({ level: stage3Level, onComplete: vi.fn(), onBack: vi.fn() });
+
+    // An inverter conducts by default, so placing it alone solves the loop.
+    await user.click(screen.getByRole('button', { name: /inverter/i }));
+    await user.click(screen.getByTestId('hit-0,0,v'));
+
+    expect(screen.getByTestId('badge-collection')).toBeInTheDocument();
+    expect(screen.queryByTestId('robot-sidekick')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('robot-sidekick-mk2')).not.toBeInTheDocument();
+  });
+
   it('allows removing a misplaced wire and placing it correctly afterward', async () => {
     const user = userEvent.setup();
     const onComplete = vi.fn();

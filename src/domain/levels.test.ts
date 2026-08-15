@@ -27,16 +27,13 @@ describe('LEVELS', () => {
     expect(new Set(rewardParts).size).toBe(rewardParts.length);
   });
 
-  it('orders every stage 1 level before every stage 2 level', () => {
+  it('orders every level of one stage before any level of the next stage', () => {
     // isLevelUnlocked has no stage-specific gate — it relies entirely on
-    // stage 2 levels coming after all of stage 1 in this array, so that the
-    // existing purely-sequential unlock rule implies stage 2 only opens up
-    // once stage 1 is fully complete. If this ordering ever breaks, that
-    // gate silently breaks with it.
+    // each stage's levels coming after all of the previous stage's in this
+    // array, so that the existing purely-sequential unlock rule implies a
+    // stage only opens up once the one before it is fully complete. If this
+    // ordering ever breaks, that gate silently breaks with it.
     const stages = LEVELS.map((level) => level.stage);
-    const firstStage2Index = stages.indexOf(2);
-    expect(firstStage2Index).toBeGreaterThan(-1);
-    expect(stages.slice(0, firstStage2Index).every((stage) => stage === 1)).toBe(true);
-    expect(stages.slice(firstStage2Index).every((stage) => stage === 2)).toBe(true);
+    expect(stages).toEqual([...stages].sort((a, b) => a - b));
   });
 });

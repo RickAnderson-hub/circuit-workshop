@@ -1,8 +1,8 @@
-import { RobotMk2Part, RobotPart } from '../domain/levels';
+import { Badge, RobotMk2Part, RobotPart } from '../domain/levels';
 import './RobotSidekick.css';
 
 export interface RobotSidekickMk2Props {
-  earnedParts: (RobotPart | RobotMk2Part)[];
+  earnedParts: (RobotPart | RobotMk2Part | Badge)[];
   celebrating: boolean;
 }
 

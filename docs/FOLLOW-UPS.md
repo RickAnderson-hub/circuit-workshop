@@ -1,6 +1,14 @@
 # Follow-ups
 
-Backlog of things worth doing next, gathered from the build and review process. Nothing here blocks play — the game is fully working today at all 16 levels across both stages.
+Backlog of things worth doing next, gathered from the build and review process. Nothing here blocks play — the game is fully working today at all 24 levels across all three stages.
+
+## Session: Stage 3 — logic gates (inverter/NOT, real OR), 8 more levels, badge rewards
+
+- **New component: inverter (a NOT gate).** Conducts by default and blocks when tapped closed — the exact opposite of a switch (which reuses `PlacedComponent.closed`, just inverted in `conducts()`). Tap toggles, long-press removes it, same interaction pattern as switch/diode. Because the solver only needs every *output* to be live (extra live paths never break anything), an inverter can never be *required* to be closed for a level to solve — the honest teaching mechanic is "place it, leave it alone, discover what tapping does," confirmed by a dedicated test.
+- **Real OR-gate levels.** The grid is a simple graph (no multi-edges between the same two junctions), so two switches can't literally share both endpoints — genuine OR needs two geometrically distinct routes between the same two "trunk" points, which costs real edges (the `or-intro`/`motor-or-diode` levels are 8-tray-item, 3×3 grids). Verified in the browser by wiring *only* branch A and confirming the bulb lit without ever touching branch B.
+- **`isLevelSolvable` got ~450x faster** (14.5s → ~30ms for the full level suite) with one change: try non-null placements before leaving a slot empty. The old order explored the "mostly empty" subtree first at every slot, which is fine for small levels but blew up combinatorially once OR-shaped levels added many slots with several candidate types each. Verified the diode-direction regression test still fails correctly after the reorder (confirms the speedup didn't accidentally weaken the search).
+- **Added 8 new stage-3 levels**: inverter alone, inverter+switch, inverter+diode, all three gate types together, an OR-gate intro, buzzer+inverter, motor OR'd via two diode branches, and a finale combining everything from all three stages. Every level verified via `isLevelSolvable` and played through in a real browser, including the finale (all five outputs — bulb, 2 LEDs, motor, buzzer — confirmed live).
+- **Stage 3 rewards are a badge collection, not a third robot.** Reused the `WorkshopMap`/`LevelScreen` reward-display pattern but swapped in 8 simple star badges (`gear`, `wrench`, `bolt`, `chip`, `coil`, `magnet`, `circuit`, `spark`) rather than more character art — a deliberate scope call given diminishing returns on a third full robot per level added. `WorkshopMap`'s stage tabs are now fully data-driven (loops over however many stages exist in `LEVELS`), so a hypothetical stage 4 would need no tab-bar code changes, just a new reward-display case.
 
 ## Session: Stage 2 — new components, 8 harder levels, a second robot
 

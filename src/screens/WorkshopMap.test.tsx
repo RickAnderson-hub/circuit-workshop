@@ -59,6 +59,7 @@ describe('WorkshopMap', () => {
 
   const stage1Levels = LEVELS.filter((level) => level.stage === 1);
   const stage2Levels = LEVELS.filter((level) => level.stage === 2);
+  const stage3Levels = LEVELS.filter((level) => level.stage === 3);
 
   it('keeps the Stage 2 tab locked until every stage 1 level is completed', () => {
     let progress = createDefaultProgress();
@@ -115,5 +116,60 @@ describe('WorkshopMap', () => {
 
     expect(screen.getByTestId('robot-sidekick-mk2')).toHaveClass('celebrating');
     expect(screen.queryByTestId('robot-sidekick')).not.toBeInTheDocument();
+  });
+
+  it('keeps the Stage 3 tab locked until every stage 2 level is completed', () => {
+    let progress = createDefaultProgress();
+    for (const level of [...stage1Levels, ...stage2Levels.slice(0, -1)]) {
+      progress = completeLevel(progress, level.id);
+    }
+    saveProgress(progress);
+
+    render(
+      <ProgressProvider>
+        <WorkshopMap onSelectLevel={vi.fn()} />
+      </ProgressProvider>,
+    );
+
+    expect(screen.getByRole('tab', { name: /stage 3/i })).toBeDisabled();
+  });
+
+  it('unlocks the Stage 3 tab with the badge collection once stage 2 is fully complete', async () => {
+    const user = userEvent.setup();
+    let progress = createDefaultProgress();
+    for (const level of [...stage1Levels, ...stage2Levels]) {
+      progress = completeLevel(progress, level.id);
+    }
+    saveProgress(progress);
+
+    render(
+      <ProgressProvider>
+        <WorkshopMap onSelectLevel={vi.fn()} />
+      </ProgressProvider>,
+    );
+
+    const stage3Tab = screen.getByRole('tab', { name: /stage 3/i });
+    expect(stage3Tab).toBeEnabled();
+    await user.click(stage3Tab);
+
+    expect(screen.getByTestId('badge-collection')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: stage3Levels[0].title })).toBeEnabled();
+    expect(screen.getByRole('button', { name: stage3Levels[1].title })).toBeDisabled();
+  });
+
+  it('switches to the Stage 3 tab and celebrates on the badge collection when a stage 3 level is the one just completed', () => {
+    let progress = createDefaultProgress();
+    for (const level of [...stage1Levels, ...stage2Levels]) {
+      progress = completeLevel(progress, level.id);
+    }
+    saveProgress(progress);
+
+    render(
+      <ProgressProvider>
+        <WorkshopMap onSelectLevel={vi.fn()} celebratingLevelId={stage3Levels[0].id} />
+      </ProgressProvider>,
+    );
+
+    expect(screen.getByTestId('badge-collection')).toHaveClass('celebrating');
   });
 });

@@ -4,24 +4,27 @@ export type RobotPart = 'nose' | 'eyes' | 'antenna' | 'propeller' | 'arms' | 'le
 
 export type RobotMk2Part = 'core' | 'blaster' | 'wings' | 'shield' | 'radar' | 'boosters' | 'claws' | 'crown';
 
+/** Stage 3's rewards are a small badge collection rather than a third robot. */
+export type Badge = 'gear' | 'wrench' | 'bolt' | 'chip' | 'coil' | 'magnet' | 'circuit' | 'spark';
+
 export interface LevelDef {
   id: string;
   title: string;
   goal: string;
   /**
-   * Which stage this level belongs to. Stage 2 levels are appended after
-   * all of stage 1 in this array, so the existing purely-sequential
+   * Which stage this level belongs to. Later stages are appended after
+   * all earlier ones in this array, so the existing purely-sequential
    * unlock rule (each level requires the one before it) already implies
-   * "stage 2 unlocks once every stage 1 level is done" — `stage` exists
-   * for presentation (grouping on the map, picking which reward robot
-   * gets the part), not as a separate gate.
+   * "stage N+1 unlocks once every stage N level is done" — `stage` exists
+   * for presentation (grouping on the map, picking which reward gets the
+   * earned part/badge), not as a separate gate.
    */
-  stage: 1 | 2;
+  stage: 1 | 2 | 3;
   rows: number;
   cols: number;
   fixed: GridState['edges'];
   tray: ComponentType[];
-  rewardPart: RobotPart | RobotMk2Part;
+  rewardPart: RobotPart | RobotMk2Part | Badge;
 }
 
 export const LEVELS: LevelDef[] = [
@@ -267,5 +270,123 @@ export const LEVELS: LevelDef[] = [
     },
     tray: ['switch', 'switch', 'wire', 'wire', 'diode', 'wire', 'wire'],
     rewardPart: 'crown',
+  },
+  {
+    id: 'inverter-intro',
+    stage: 3,
+    title: 'Install a Backwards Switch',
+    goal: "An inverter is a backwards switch — a NOT gate. It lets electricity through when you leave it ALONE, and BLOCKS it when you tap it closed, the opposite of a normal switch. Place the inverter and watch the bulb light up right away. Then tap it to see what 'off' looks like for this one!",
+    rows: 2,
+    cols: 2,
+    fixed: {
+      [edgeKey(0, 0, 'h')]: { type: 'battery' },
+      [edgeKey(0, 1, 'v')]: { type: 'bulb' },
+      [edgeKey(1, 0, 'h')]: { type: 'wire' },
+    },
+    tray: ['inverter'],
+    rewardPart: 'gear',
+  },
+  {
+    id: 'inverter-switch-combo',
+    stage: 3,
+    title: 'Mix a Switch and Its Opposite',
+    goal: 'A switch and an inverter can share the same loop, but they want opposite treatment: close the switch, and leave the inverter alone. Get both right at once to light the bulb.',
+    rows: 2,
+    cols: 2,
+    fixed: {
+      [edgeKey(0, 0, 'h')]: { type: 'battery' },
+      [edgeKey(0, 1, 'v')]: { type: 'bulb' },
+    },
+    tray: ['switch', 'inverter'],
+    rewardPart: 'wrench',
+  },
+  {
+    id: 'inverter-diode-combo',
+    stage: 3,
+    title: 'A Backwards Switch and a One-Way Door',
+    goal: 'Now combine a one-way diode with a backwards inverter on the same loop. Figure out which way the diode should point, and remember: leave the inverter alone unless you want it to block.',
+    rows: 2,
+    cols: 2,
+    fixed: {
+      [edgeKey(0, 0, 'h')]: { type: 'battery' },
+      [edgeKey(0, 1, 'v')]: { type: 'bulb' },
+    },
+    tray: ['diode', 'inverter'],
+    rewardPart: 'bolt',
+  },
+  {
+    id: 'triple-logic-combo',
+    stage: 3,
+    title: 'Three Kinds of Gate in One Loop',
+    goal: "A switch, a one-way diode, and a backwards inverter, all on the same loop: close the switch, point the diode the right way, and leave the inverter untouched. Every piece has its own rule — get them all right together.",
+    rows: 2,
+    cols: 3,
+    fixed: {
+      [edgeKey(0, 0, 'h')]: { type: 'battery' },
+      [edgeKey(1, 0, 'h')]: { type: 'bulb' },
+    },
+    tray: ['switch', 'diode', 'inverter', 'wire'],
+    rewardPart: 'chip',
+  },
+  {
+    id: 'or-intro',
+    stage: 3,
+    title: 'Give the Bulb Two Ways to Turn On',
+    goal: "So far, every switch has needed to be closed for the bulb to light — that's called AND. This circuit is different: it has two separate switch-gated paths back to the battery, and closing EITHER one alone (not both) will light the bulb. That's called OR — the electricity just takes whichever path is open.",
+    rows: 3,
+    cols: 3,
+    fixed: {
+      [edgeKey(1, 0, 'h')]: { type: 'battery' },
+      [edgeKey(1, 1, 'h')]: { type: 'bulb' },
+    },
+    tray: ['switch', 'switch', 'wire', 'wire', 'wire', 'wire', 'wire', 'wire'],
+    rewardPart: 'coil',
+  },
+  {
+    id: 'buzzer-inverter',
+    stage: 3,
+    title: 'A Backwards Switch for the Buzzer',
+    goal: 'Inverters work the same way no matter what they power. Place the inverter to complete the loop and hear the buzzer sound right away — tap it if you want to silence it the backwards way.',
+    rows: 2,
+    cols: 2,
+    fixed: {
+      [edgeKey(0, 0, 'h')]: { type: 'battery' },
+      [edgeKey(0, 1, 'v')]: { type: 'buzzer' },
+      [edgeKey(1, 0, 'h')]: { type: 'wire' },
+    },
+    tray: ['inverter'],
+    rewardPart: 'magnet',
+  },
+  {
+    id: 'motor-or-diode',
+    stage: 3,
+    title: 'Two One-Way Paths to the Same Motor',
+    goal: "OR works with diodes too, not just switches: this motor has two separate diode-gated paths back to the battery. Get EITHER diode pointing the right way (with its wires in place) and the motor spins — you don't need both.",
+    rows: 3,
+    cols: 3,
+    fixed: {
+      [edgeKey(1, 0, 'h')]: { type: 'battery' },
+      [edgeKey(1, 1, 'h')]: { type: 'motor' },
+    },
+    tray: ['diode', 'diode', 'wire', 'wire', 'wire', 'wire', 'wire', 'wire'],
+    rewardPart: 'circuit',
+  },
+  {
+    id: 'stage3-finale',
+    stage: 3,
+    title: 'The Ultimate Logic Circuit',
+    goal: "Everything you've learned, all in one big circuit: a switch-gated bulb, series LEDs, a diode-guarded motor, a buzzer, and now a backwards inverter too. Wire it all up, get every gate into the right state, and bring the whole advanced workshop to life.",
+    rows: 4,
+    cols: 3,
+    fixed: {
+      [edgeKey(0, 0, 'h')]: { type: 'bulb' },
+      [edgeKey(1, 0, 'h')]: { type: 'battery' },
+      [edgeKey(1, 0, 'v')]: { type: 'led' },
+      [edgeKey(1, 1, 'v')]: { type: 'led' },
+      [edgeKey(3, 0, 'h')]: { type: 'motor' },
+      [edgeKey(0, 2, 'v')]: { type: 'buzzer' },
+    },
+    tray: ['switch', 'switch', 'wire', 'wire', 'diode', 'inverter', 'wire'],
+    rewardPart: 'spark',
   },
 ];

@@ -1,0 +1,26 @@
+.badge-collection {
+  display: block;
+  margin: 0 auto;
+}
+
+.badge-collection.celebrating {
+  animation: badge-bounce 0.6s ease-in-out infinite;
+}
+
+@keyframes badge-bounce {
+  0%,
+  100% {
+    transform: translateY(0) rotate(-2deg);
+  }
+  50% {
+    transform: translateY(-10px) rotate(2deg);
+  }
+}
+
+.badge-icon {
+  opacity: 0.25;
+}
+
+.badge-icon.earned {
+  opacity: 1;
+}

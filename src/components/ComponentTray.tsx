@@ -18,6 +18,7 @@ const LABELS: Record<ComponentType, string> = {
   diode: 'Diode',
   buzzer: 'Buzzer',
   motor: 'Motor',
+  inverter: 'Inverter',
 };
 
 const GRID_KEY_DRAG_TYPE = 'application/x-grid-key';

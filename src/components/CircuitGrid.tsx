@@ -8,6 +8,7 @@ export interface CircuitGridProps {
   onPlace: (key: string, type: ComponentType) => void;
   onToggleSwitch: (key: string) => void;
   onToggleDiode: (key: string) => void;
+  onToggleInverter: (key: string) => void;
   onRemove: (key: string) => void;
   fixedKeys: Set<string>;
   pendingComponent: ComponentType | null;
@@ -139,6 +140,51 @@ function BuzzerIcon({ testId, live }: { testId: string; live: boolean }) {
   );
 }
 
+function InverterIcon({
+  testId,
+  x1,
+  y1,
+  x2,
+  y2,
+  closed,
+}: {
+  testId: string;
+  x1: number;
+  y1: number;
+  x2: number;
+  y2: number;
+  closed: boolean;
+}) {
+  const dx = x2 - x1;
+  const dy = y2 - y1;
+  const len = Math.hypot(dx, dy) || 1;
+  const ux = dx / len;
+  const uy = dy / len;
+  const px = -uy;
+  const py = ux;
+  const pivotX = x1 + ux * 10;
+  const pivotY = y1 + uy * 10;
+  const contactX = x1 + ux * (len - 10);
+  const contactY = y1 + uy * (len - 10);
+  // Inverted from SwitchIcon: it rests against the contact (conducting) by
+  // default, and swings away (blocking) once closed — the opposite of a
+  // switch, and colored the opposite way too (green=open, red=closed) as a
+  // visual cue that it behaves backwards.
+  const tipX = !closed ? contactX : pivotX + ux * (len - 20) * 0.5 + px * 14;
+  const tipY = !closed ? contactY : pivotY + uy * (len - 20) * 0.5 + py * 14;
+  const color = !closed ? '#27ae60' : '#c0392b';
+  const midX = (x1 + x2) / 2;
+  const midY = (y1 + y2) / 2;
+  return (
+    <g data-testid={testId} className={`component-icon inverter-icon${closed ? ' closed' : ' open'}`}>
+      <line x1={pivotX} y1={pivotY} x2={tipX} y2={tipY} stroke={color} strokeWidth={4} strokeLinecap="round" />
+      <circle cx={pivotX} cy={pivotY} r={4} fill="#1a1a1a" />
+      <circle cx={contactX} cy={contactY} r={4} fill="#1a1a1a" />
+      <circle cx={midX} cy={midY} r={6} fill="none" stroke="#1a1a1a" strokeWidth={2} />
+    </g>
+  );
+}
+
 function MotorIcon({ testId, live }: { testId: string; live: boolean }) {
   return (
     <g data-testid={testId} className={`component-icon motor-icon${live ? ' live' : ''}`}>
@@ -156,6 +202,7 @@ export function CircuitGrid({
   onPlace,
   onToggleSwitch,
   onToggleDiode,
+  onToggleInverter,
   onRemove,
   fixedKeys,
   pendingComponent,
@@ -185,6 +232,7 @@ export function CircuitGrid({
       if (fixedKeys.has(key)) return;
       if (component.type === 'switch') onToggleSwitch(key);
       else if (component.type === 'diode') onToggleDiode(key);
+      else if (component.type === 'inverter') onToggleInverter(key);
       else onRemove(key);
       return;
     }
@@ -200,7 +248,8 @@ export function CircuitGrid({
 
   function handleTogglePointerDown(key: string) {
     const component = grid.edges[key];
-    const isToggleable = component?.type === 'switch' || component?.type === 'diode';
+    const isToggleable =
+      component?.type === 'switch' || component?.type === 'diode' || component?.type === 'inverter';
     if (!isToggleable || fixedKeys.has(key)) return;
     longPressFired.current = false;
     longPressTimer.current = setTimeout(() => {
@@ -227,6 +276,7 @@ export function CircuitGrid({
           if (!component && pendingComponent) classes.push('placeable');
           if (component) classes.push('occupied');
           if (component?.type === 'switch') classes.push(component.closed ? 'switch-closed' : 'switch-open');
+          if (component?.type === 'inverter') classes.push(component.closed ? 'inverter-closed' : 'inverter-open');
           if (isLive) classes.push('live');
           if (dragOverKey === key && !component) classes.push('drag-over');
 
@@ -317,6 +367,16 @@ export function CircuitGrid({
                 <g transform={`translate(${midX} ${midY})`}>
                   <MotorIcon testId={`icon-motor-${key}`} live={isLive} />
                 </g>
+              )}
+              {component?.type === 'inverter' && (
+                <InverterIcon
+                  testId={`icon-inverter-${key}`}
+                  x1={x1}
+                  y1={y1}
+                  x2={x2}
+                  y2={y2}
+                  closed={!!component.closed}
+                />
               )}
             </g>
           );

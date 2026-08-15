@@ -7,6 +7,7 @@ import { CircuitGrid } from '../components/CircuitGrid';
 import { ComponentTray } from '../components/ComponentTray';
 import { RobotSidekick } from '../components/RobotSidekick';
 import { RobotSidekickMk2 } from '../components/RobotSidekickMk2';
+import { BadgeCollection } from '../components/BadgeCollection';
 import { useProgress } from '../store/ProgressContext';
 import { playSound } from '../audio/sound';
 import { useMuted } from '../audio/useMuted';
@@ -100,6 +101,17 @@ export function LevelScreen({ level, onComplete, onBack, onNext }: LevelScreenPr
     });
   }
 
+  function handleToggleInverter(key: string) {
+    setGrid((previous) => {
+      const component = previous.edges[key];
+      if (!component || component.type !== 'inverter') return previous;
+      return {
+        ...previous,
+        edges: { ...previous.edges, [key]: { type: 'inverter' as const, closed: !component.closed } },
+      };
+    });
+  }
+
   return (
     <div className="level-screen">
       <div className="level-screen-header">
@@ -120,11 +132,9 @@ export function LevelScreen({ level, onComplete, onBack, onNext }: LevelScreenPr
       <p className="goal">{level.goal}</p>
       {solved && (
         <div className="level-complete-banner" data-testid="level-complete-banner">
-          {level.stage === 2 ? (
-            <RobotSidekickMk2 earnedParts={earnedParts} celebrating />
-          ) : (
-            <RobotSidekick earnedParts={earnedParts} celebrating />
-          )}
+          {level.stage === 3 && <BadgeCollection earnedParts={earnedParts} celebrating />}
+          {level.stage === 2 && <RobotSidekickMk2 earnedParts={earnedParts} celebrating />}
+          {level.stage === 1 && <RobotSidekick earnedParts={earnedParts} celebrating />}
           <p className="level-complete-message">🎉 Solved!</p>
           <div className="level-complete-actions">
             <button type="button" onClick={onBack}>
@@ -143,6 +153,7 @@ export function LevelScreen({ level, onComplete, onBack, onNext }: LevelScreenPr
         onPlace={handlePlace}
         onToggleSwitch={handleToggleSwitch}
         onToggleDiode={handleToggleDiode}
+        onToggleInverter={handleToggleInverter}
         onRemove={handleRemove}
         fixedKeys={fixedKeys}
         pendingComponent={selected}

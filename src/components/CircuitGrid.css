@@ -49,6 +49,16 @@
   stroke-dasharray: 2 8;
 }
 
+.slot.inverter-open {
+  stroke: #27ae60;
+  stroke-dasharray: 2 8;
+}
+
+.slot.inverter-closed {
+  stroke: #c0392b;
+  stroke-dasharray: 2 8;
+}
+
 .slot.live {
   stroke: #ffcc33;
   filter: drop-shadow(0 0 4px #ffcc33);

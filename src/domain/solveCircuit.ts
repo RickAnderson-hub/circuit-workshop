@@ -2,6 +2,7 @@ import { edgeJunctions, EdgeKey, GridState, junctionKey, PlacedComponent } from 
 
 function conducts(component: PlacedComponent): boolean {
   if (component.type === 'switch') return component.closed === true;
+  if (component.type === 'inverter') return component.closed !== true;
   return true;
 }
 

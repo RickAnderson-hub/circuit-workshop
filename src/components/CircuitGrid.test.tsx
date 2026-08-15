@@ -14,6 +14,7 @@ describe('CircuitGrid', () => {
         onPlace={onPlace}
         onToggleSwitch={vi.fn()}
         onToggleDiode={vi.fn()}
+        onToggleInverter={vi.fn()}
         onRemove={vi.fn()}
         fixedKeys={new Set()}
         pendingComponent="wire"
@@ -34,6 +35,7 @@ describe('CircuitGrid', () => {
         onPlace={onPlace}
         onToggleSwitch={vi.fn()}
         onToggleDiode={vi.fn()}
+        onToggleInverter={vi.fn()}
         onRemove={vi.fn()}
         fixedKeys={new Set([edgeKey(0, 0, 'h')])}
         pendingComponent="wire"
@@ -54,6 +56,7 @@ describe('CircuitGrid', () => {
         onPlace={vi.fn()}
         onToggleSwitch={onToggleSwitch}
         onToggleDiode={vi.fn()}
+        onToggleInverter={vi.fn()}
         onRemove={vi.fn()}
         fixedKeys={new Set()}
         pendingComponent={null}
@@ -75,6 +78,7 @@ describe('CircuitGrid', () => {
         onPlace={vi.fn()}
         onToggleSwitch={vi.fn()}
         onToggleDiode={vi.fn()}
+        onToggleInverter={vi.fn()}
         onRemove={vi.fn()}
         fixedKeys={new Set([edgeKey(0, 0, 'h')])}
         pendingComponent={null}
@@ -95,6 +99,7 @@ describe('CircuitGrid', () => {
         onPlace={vi.fn()}
         onToggleSwitch={vi.fn()}
         onToggleDiode={vi.fn()}
+        onToggleInverter={vi.fn()}
         onRemove={vi.fn()}
         fixedKeys={new Set([edgeKey(0, 0, 'h'), edgeKey(0, 1, 'v')])}
         pendingComponent={null}
@@ -115,6 +120,7 @@ describe('CircuitGrid', () => {
         onPlace={onPlace}
         onToggleSwitch={vi.fn()}
         onToggleDiode={vi.fn()}
+        onToggleInverter={vi.fn()}
         onRemove={vi.fn()}
         fixedKeys={new Set()}
         pendingComponent={null}
@@ -143,6 +149,7 @@ describe('CircuitGrid', () => {
         onPlace={onPlace}
         onToggleSwitch={vi.fn()}
         onToggleDiode={vi.fn()}
+        onToggleInverter={vi.fn()}
         onRemove={vi.fn()}
         fixedKeys={new Set([edgeKey(0, 0, 'h')])}
         pendingComponent={null}
@@ -171,6 +178,7 @@ describe('CircuitGrid', () => {
         onPlace={vi.fn()}
         onToggleSwitch={vi.fn()}
         onToggleDiode={vi.fn()}
+        onToggleInverter={vi.fn()}
         onRemove={onRemove}
         fixedKeys={new Set()}
         pendingComponent={null}
@@ -191,6 +199,7 @@ describe('CircuitGrid', () => {
         onPlace={vi.fn()}
         onToggleSwitch={vi.fn()}
         onToggleDiode={vi.fn()}
+        onToggleInverter={vi.fn()}
         onRemove={onRemove}
         fixedKeys={new Set([edgeKey(0, 0, 'h')])}
         pendingComponent={null}
@@ -209,6 +218,7 @@ describe('CircuitGrid', () => {
         onPlace={vi.fn()}
         onToggleSwitch={vi.fn()}
         onToggleDiode={vi.fn()}
+        onToggleInverter={vi.fn()}
         onRemove={vi.fn()}
         fixedKeys={new Set()}
         pendingComponent={null}
@@ -236,6 +246,7 @@ describe('CircuitGrid', () => {
         onPlace={vi.fn()}
         onToggleSwitch={vi.fn()}
         onToggleDiode={vi.fn()}
+        onToggleInverter={vi.fn()}
         onRemove={vi.fn()}
         fixedKeys={new Set([edgeKey(0, 0, 'h')])}
         pendingComponent={null}
@@ -256,6 +267,7 @@ describe('CircuitGrid', () => {
         onPlace={vi.fn()}
         onToggleSwitch={onToggleSwitch}
         onToggleDiode={vi.fn()}
+        onToggleInverter={vi.fn()}
         onRemove={onRemove}
         fixedKeys={new Set()}
         pendingComponent={null}
@@ -283,6 +295,7 @@ describe('CircuitGrid', () => {
         onPlace={vi.fn()}
         onToggleSwitch={onToggleSwitch}
         onToggleDiode={vi.fn()}
+        onToggleInverter={vi.fn()}
         onRemove={onRemove}
         fixedKeys={new Set()}
         pendingComponent={null}
@@ -310,6 +323,7 @@ describe('CircuitGrid', () => {
         onPlace={vi.fn()}
         onToggleSwitch={vi.fn()}
         onToggleDiode={vi.fn()}
+        onToggleInverter={vi.fn()}
         onRemove={onRemove}
         fixedKeys={new Set([edgeKey(0, 0, 'h')])}
         pendingComponent={null}
@@ -335,6 +349,7 @@ describe('CircuitGrid', () => {
         onPlace={vi.fn()}
         onToggleSwitch={vi.fn()}
         onToggleDiode={onToggleDiode}
+        onToggleInverter={vi.fn()}
         onRemove={vi.fn()}
         fixedKeys={new Set()}
         pendingComponent={null}
@@ -356,6 +371,7 @@ describe('CircuitGrid', () => {
         onPlace={vi.fn()}
         onToggleSwitch={vi.fn()}
         onToggleDiode={onToggleDiode}
+        onToggleInverter={vi.fn()}
         onRemove={onRemove}
         fixedKeys={new Set()}
         pendingComponent={null}
@@ -382,6 +398,7 @@ describe('CircuitGrid', () => {
         onPlace={vi.fn()}
         onToggleSwitch={vi.fn()}
         onToggleDiode={vi.fn()}
+        onToggleInverter={vi.fn()}
         onRemove={vi.fn()}
         fixedKeys={new Set()}
         pendingComponent={null}
@@ -390,5 +407,72 @@ describe('CircuitGrid', () => {
     expect(screen.getByTestId(`icon-diode-${edgeKey(0, 0, 'h')}`)).toBeInTheDocument();
     expect(screen.getByTestId(`icon-buzzer-${edgeKey(0, 1, 'v')}`)).toBeInTheDocument();
     expect(screen.getByTestId(`icon-motor-${edgeKey(0, 0, 'v')}`)).toBeInTheDocument();
+  });
+
+  it('toggles a placed inverter on tap', async () => {
+    const user = userEvent.setup();
+    const onToggleInverter = vi.fn();
+    const grid = createEmptyGrid(2, 2);
+    grid.edges[edgeKey(0, 0, 'h')] = { type: 'inverter' };
+    render(
+      <CircuitGrid
+        grid={grid}
+        onPlace={vi.fn()}
+        onToggleSwitch={vi.fn()}
+        onToggleDiode={vi.fn()}
+        onToggleInverter={onToggleInverter}
+        onRemove={vi.fn()}
+        fixedKeys={new Set()}
+        pendingComponent={null}
+      />,
+    );
+    await user.click(screen.getByTestId(`hit-${edgeKey(0, 0, 'h')}`));
+    expect(onToggleInverter).toHaveBeenCalledWith(edgeKey(0, 0, 'h'));
+  });
+
+  it('removes a placed inverter on a long press, without toggling it', () => {
+    vi.useFakeTimers();
+    const onToggleInverter = vi.fn();
+    const onRemove = vi.fn();
+    const grid = createEmptyGrid(2, 2);
+    grid.edges[edgeKey(0, 0, 'h')] = { type: 'inverter' };
+    render(
+      <CircuitGrid
+        grid={grid}
+        onPlace={vi.fn()}
+        onToggleSwitch={vi.fn()}
+        onToggleDiode={vi.fn()}
+        onToggleInverter={onToggleInverter}
+        onRemove={onRemove}
+        fixedKeys={new Set()}
+        pendingComponent={null}
+      />,
+    );
+    const hit = screen.getByTestId(`hit-${edgeKey(0, 0, 'h')}`);
+    fireEvent.pointerDown(hit);
+    vi.advanceTimersByTime(600);
+    fireEvent.pointerUp(hit);
+
+    expect(onRemove).toHaveBeenCalledWith(edgeKey(0, 0, 'h'));
+    expect(onToggleInverter).not.toHaveBeenCalled();
+    vi.useRealTimers();
+  });
+
+  it('renders a distinct icon for inverter', () => {
+    const grid = createEmptyGrid(2, 2);
+    grid.edges[edgeKey(0, 0, 'h')] = { type: 'inverter' };
+    render(
+      <CircuitGrid
+        grid={grid}
+        onPlace={vi.fn()}
+        onToggleSwitch={vi.fn()}
+        onToggleDiode={vi.fn()}
+        onToggleInverter={vi.fn()}
+        onRemove={vi.fn()}
+        fixedKeys={new Set()}
+        pendingComponent={null}
+      />,
+    );
+    expect(screen.getByTestId(`icon-inverter-${edgeKey(0, 0, 'h')}`)).toBeInTheDocument();
   });
 });
